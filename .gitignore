@@ -1,0 +1,106 @@
+# =============================================================================
+# DATA — ningún dato real debe entrar al repo
+# =============================================================================
+# Solo permitimos schema/diccionario (.md) y queries (.sql) bajo data/.
+# Cualquier export de tabla o muestreo queda fuera.
+data/*
+!data/*.md
+!data/*.sql
+
+# Y por si acaso, en cualquier subdirectorio:
+*.csv
+*.tsv
+*.parquet
+*.feather
+*.arrow
+*.xlsx
+*.xls
+*.h5
+*.hdf5
+*.npz
+*.npy
+
+# JSON de datos (excepto config legítima del proyecto)
+data/*.json
+data/*.jsonl
+
+# =============================================================================
+# CREDENCIALES — nunca al repo
+# =============================================================================
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+credentials.json
+service-account*.json
+client_secret*.json
+.gcp/
+.gcloud/
+gcp-key*.json
+
+# =============================================================================
+# Modelos entrenados (binarios + pueden contener fingerprints del dataset)
+# =============================================================================
+models/*
+!models/.gitkeep
+!models/README.md
+*.pkl
+*.joblib
+*.onnx
+*.pt
+*.pth
+*.h5
+
+# =============================================================================
+# Reports — auto-generados, pueden contener números del dataset.
+# Excluir por defecto; usar `git add -f reports/<file>` si querés versionar uno.
+# =============================================================================
+reports/*
+!reports/.gitkeep
+
+# =============================================================================
+# Python
+# =============================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+build/
+dist/
+
+# =============================================================================
+# Jupyter
+# =============================================================================
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# =============================================================================
+# IDE / OS
+# =============================================================================
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# =============================================================================
+# Logs y caches misceláneos
+# =============================================================================
+*.log
+logs/
+.cache/
+tmp/

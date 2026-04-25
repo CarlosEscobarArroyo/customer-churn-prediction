@@ -1,0 +1,45 @@
+[project]
+name = "customer-churn-prediction"
+version = "0.1.0"
+description = "Customer churn prediction for Glamour"
+readme = "README.md"
+requires-python = ">=3.12"
+authors = [
+    { name = "Carlos Escobar", email = "carlos.escobar.arroyo@gmail.com" },
+]
+dependencies = [
+    "numpy",
+    "pandas",
+    "pyarrow",
+    "scipy",
+    "matplotlib",
+    "seaborn",
+    "plotly",
+    "scikit-learn",
+    "xgboost",
+    "lightgbm",
+    "imbalanced-learn",
+    "shap",
+    "numba>=0.60",
+    "optuna",
+    "joblib",
+    "jupyterlab",
+    "ipykernel",
+    "ipywidgets",
+    "google-cloud-bigquery",
+    "google-cloud-storage",
+    "db-dtypes",
+    "pandas-gbq",
+    "python-dotenv",
+    "pydantic",
+    "tqdm",
+]
+
+[dependency-groups]
+dev = [
+    "ruff",
+    "mypy",
+    "pytest",
+    "pytest-cov",
+    "pre-commit",
+]
