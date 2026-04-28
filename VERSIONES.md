@@ -20,7 +20,8 @@ Para detalles que no caben acá:
 
 | Versión | Estado | Granularidad | Horizonte | Población | Churn rate | n filas | AUC GKF (HGB) | AUC fwd (HGB) | Std AUC fwd |
 |---------|--------|--------------|-----------|-----------|-----------:|--------:|--------------:|--------------:|------------:|
-| **v5**  | ✅ vigente | mes | 6 meses | full data + hist ≥ 3 | 27.5% | 23 684 | **0.7465** | **0.7509** | 0.031 |
+| **v5 (modelo final tuneado)** | ✅ vigente | mes | 6 meses | full data + hist ≥ 3 | 27.5% | 23 684 | **0.7485** | **0.7537** | 0.030 |
+| v5 (baseline pre-tuning) | reemplazado por tuneado | mes | 6 meses | full data + hist ≥ 3 | 27.5% | 23 684 | 0.7465 | 0.7509 | 0.031 |
 | v6_all  | descartada (target trampa) | mes | 6 meses | post-2022, sin filtro hist | 36.6% | 14 362 | 0.7910 | 0.7614 | 0.029 |
 | v6      | candidata (no domina v5) | mes | 6 meses | post-2022 + hist ≥ 3 | 25.9% | 9 841 | 0.7639 | 0.7424 | 0.037 |
 | v4      | histórica | mes | 4 meses | full data + hist ≥ 3 | 32.6% | 24 159 | 0.7413 | 0.7286 | 0.030 |
@@ -40,7 +41,7 @@ test (mide estabilidad temporal).
 - **Estado**: experimento concluido el 2026-04-26. **No se migra**: v5 sigue vigente.
 - **SQL**: `data/qry_churn_v6.sql`, `data/qry_churn_v6_all.sql`
 - **Tablas BQ**: `training_churn_v6`, `training_churn_v6_all`
-- **Notebook**: `notebooks/08_baselines_v6.ipynb`
+- **Notebook**: `notebooks/drafts/08_baselines_v6.ipynb`
 
 ### Hipótesis probadas
 
@@ -112,8 +113,38 @@ Esto puede aportar más que seguir iterando sobre filtros temporales.
 - **Vigente desde**: 2026-04-26
 - **SQL**: `data/qry_churn_v5.sql`
 - **Tabla BQ**: `glamour-peru-dw.glamour_dw.training_churn_v5`
-- **Notebooks**: `notebooks/06_horizonte_v4.ipynb` (validación del horizonte),
-  `notebooks/07_baselines_v5.ipynb` (baselines + comparación contra v4)
+- **Notebooks de iteración**: `notebooks/drafts/06_horizonte_v4.ipynb` (validación del horizonte),
+  `notebooks/drafts/07_baselines_v5.ipynb` (baselines + comparación contra v4)
+- **Notebooks entregables**: `notebooks/clean/modelo_final_v5.ipynb` (modelo vigente),
+  `notebooks/clean/ablation_temporal_v5.ipynb` (eliminación de features temporales),
+  `notebooks/clean/tuning_optuna_v5.ipynb` (tuning de hiperparámetros)
+
+### Pulido del modelo (2026-04-26, posterior al baseline v5)
+
+Tres iteraciones que mejoraron el modelo sin cambiar el dataset:
+
+1. **Eliminación de `ccodrelacion`**: aparecía top-4 en permutación pero
+   era un ID disfrazado. Costo: −0.005 AUC (ruido).
+2. **Ablation de `mes_num` y `anio_mes_num`** (`ablation_temporal_v5.ipynb`):
+   en split forward el modelo es igual o mejor sin ellas (PR-AUC fwd
+   +4.6%). Reduce el riesgo de extrapolación de `anio_mes_num` futuros.
+3. **Tuning con Optuna** (`tuning_optuna_v5.ipynb`, 50 trials):
+   `learning_rate=0.0175, max_iter=750, max_depth=4, max_leaf_nodes=22, min_samples_leaf=100`.
+   `learning_rate` explica 79% de la varianza durante la búsqueda.
+
+| Métrica | v5 baseline | v5 modelo final | Δ |
+|---|---:|---:|---:|
+| Features (post-OHE excluidas) | 42 | **39** | −3 |
+| AUC GroupKFold (mean ± std) | 0.7465 ± 0.007 | **0.7485 ± 0.008** | +0.0020 |
+| AUC split forward | 0.7509 | **0.7537** | +0.0028 |
+| PR-AUC OOF | 0.5029 | **0.5020** | ≈ |
+| Std AUC por mes (test) | 0.034 | 0.030 | mejor estabilidad |
+
+### Punto operativo recomendado: t = 0.50
+
+Recall 0.73, precision 0.43 (lift 1.56× sobre prevalencia), 47% de la
+base contactada. Discusión completa de viabilidad de negocio en la
+Parte 9 de `notebooks/clean/modelo_final_v5.ipynb`.
 
 ### Motivación
 
@@ -167,7 +198,7 @@ menor prevalencia, pero el lift sobre prevalencia mejora.
 - **Estado**: histórica (reemplazada por v5 el 2026-04-26)
 - **SQL**: `data/qry_churn_v4.sql`
 - **Tabla BQ**: `glamour-peru-dw.glamour_dw.training_churn_v4`
-- **Notebooks**: `notebooks/05_baselines_v4.ipynb`
+- **Notebooks**: `notebooks/drafts/05_baselines_v4.ipynb`
 - **Doc dedicado**: `V4_MENSUAL.md`
 
 ### Motivación
@@ -216,8 +247,8 @@ validar el horizonte k=4 — esa validación motivó v5.
 - **Estado**: histórica
 - **SQL**: `data/qry_churn_v3.sql`
 - **Tabla BQ**: `training_churn_v3` (puede o no estar en BQ; ver `bq ls`)
-- **Notebooks**: `notebooks/02_validacion_v3.ipynb`,
-  `notebooks/03_baselines.ipynb`, `notebooks/04_split_temporal.ipynb`
+- **Notebooks**: `notebooks/drafts/02_validacion_v3.ipynb`,
+  `notebooks/drafts/03_baselines.ipynb`, `notebooks/drafts/04_split_temporal.ipynb`
 
 ### Cambios vs v2
 
@@ -263,7 +294,7 @@ drift churn rate +8.2pp train→test.
 
 - **Estado**: retirada por leakage múltiple
 - **SQL**: `data/qry_churn_v2.sql`
-- **Notebooks**: `notebooks/01_eda.ipynb`
+- **Notebooks**: `notebooks/drafts/01_eda.ipynb`
 
 ### Forma
 
@@ -304,7 +335,7 @@ Todo eso motivó v3 sin cambiar la definición del problema.
 1. Crear `data/qry_churn_v<N>.sql` con header documentando el cambio
    sustantivo.
 2. Correr la query en BigQuery (`bq query --use_legacy_sql=false`).
-3. Crear notebook de validación (`notebooks/0X_<descripcion>.ipynb`) que
+3. Crear notebook de validación (`notebooks/drafts/0X_<descripcion>.ipynb`) que
    reproduzca los baselines clave (GroupKFold + split forward) y compare
    contra la versión anterior.
 4. Agregar entrada nueva al principio de este archivo (después del

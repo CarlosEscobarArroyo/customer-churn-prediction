@@ -1,5 +1,9 @@
 # Diccionario de Datos — Dataset de Silent Churn (v2)
 
+> ⚠️ **Este diccionario describe el schema del dataset v2** (granularidad campaña, hist ≥ 4). El dataset vigente es **v5** (granularidad mensual, hist ≥ 3). Ver `V4_MENSUAL.md` y `VERSIONES.md` para los renombres y diferencias.
+>
+> **Features excluidas del modelo final v5** (presentes en el SQL pero no se entrenan): `id_vendedor`, `mes_obs`, `mes_rank_obs`, `fecha_ingreso`, `id_coordinadora`, `ccodrelacion` (ID disfrazado, ver §6 de `STATUS.md`), `ccodubigeo`, `distrito`, `mes_num`, `anio_mes_num` (eliminadas por `notebooks/clean/ablation_temporal_v5.ipynb`). Ver `notebooks/clean/modelo_final_v5.ipynb` §2.2 para el detalle.
+
 ## Resumen del Proyecto
 
 | Campo | Detalle |
