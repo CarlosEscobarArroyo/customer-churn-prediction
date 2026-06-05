@@ -18,6 +18,7 @@ dependencies = [
     "scikit-learn",
     "xgboost",
     "lightgbm",
+    "catboost",
     "imbalanced-learn",
     "shap",
     "numba>=0.60",
@@ -34,6 +35,8 @@ dependencies = [
     "pydantic",
     "tqdm",
     "tabulate>=0.10.0",
+    "pypdf",
+    "nbconvert",
 ]
 
 [dependency-groups]

@@ -1,0 +1,1375 @@
+
+----- PÁGINA 1 -----
+How training on multiple time slices improves
+performance in churn prediction
+Theresa Gattermann-Itscherta,∗, Ulrich W. Thonemann a
+aDepartment of Supply Chain Management and Management Science,
+Albertus-Magnus-Platz, University of Cologne, 50932 Cologne, Germany
+Abstract
+Customer churn prediction models using machine learning classiﬁcation have
+been developed predominantly by training and testing on one time slice of
+data. We train models on multiple time slices of data and refer to this ap-
+proach as multi-slicing. Our results show that given the same time frame
+of data, multi-slicing signiﬁcantly improves churn prediction performance
+compared to training on the entire data set as one time slice. We demon-
+strate that besides an increased training set size, the improvement is driven
+by training on samples from diﬀerent time slices. For data from a conve-
+nience wholesaler, we show that multi-slicing addresses the rarity of churn
+samples and the risk of overﬁtting to the distinctive situation in a single
+training time slice. Multi-slicing makes a model more generalizable, which
+is particularly relevant whenever conditions change or ﬂuctuate over time.
+We also discuss how to choose the number of time slices.
+Keywords: Analytics, Churn Prediction, Marketing, Retailing, Machine
+Learning
+∗Corresponding author. Tel.: +49 221 470 89985.
+Email addresses: theresa.gattermann@uni-koeln.de (Theresa
+Gattermann-Itschert), ulrich.thonemann@uni-koeln.de (Ulrich W. Thonemann)
+Preprint submitted to European Journal of Operational Research April 9, 2021
+
+----- PÁGINA 2 -----
+1. Introduction
+In industries with high customer acquisition costs, customer retention
+is a crucial success factor (Reichheld, 1996; Zeithaml et al., 1996). For
+targeting customers with retention activities, companies have to identify
+customers who might churn. Machine learning classiﬁcation models have
+been used for churn prediction tasks in diﬀerent industries. Well known
+examples of such industries are telecommunications (Verbeke et al., 2012;
+Coussement et al., 2017), banking (Larivi` ere & Van den Poel, 2005; Kumar &
+Ravi, 2008), and TV/newspaper subscription (Burez & Van den Poel, 2007;
+Coussement & Van den Poel, 2009; Ballings & Van den Poel, 2012). By
+training on a large sample of customers, models learn to identify customers
+who are likely to stay with the company and those who are likely to churn.
+Most churn prediction studies consider a single time window of data
+and train and test their models on a single time slice. By doing so, they
+potentially miss extracting relevant information from the data and cannot
+properly capture that conditions and drivers of churn change over time.
+Changing environments make it diﬃcult to train a model that upholds its
+performance in the future (Risselada et al., 2010).
+In this study, we structure data into time slices and use multiple time
+slices for training a model (multi-slicing). Each time slice considers data
+from a speciﬁc time window. The features and labels are computed rela-
+tive to a reference point within that window. Multiple time slices are then
+combined to one training set. With this concept, a model can be trained on
+samples from diﬀerent points in time.
+Churn prediction studies that use multiple time periods within the train-
+ing data are rare. G¨ ur Ali & Arıt¨ urk (2014) show for a case in the banking
+sector that the technique leads to better results than the common approach
+of training on only one slice of data. However, they do not analyze the
+drivers of performance improvement. We develop and compare diﬀerent
+multi-slicing versions to identify these drivers.
+Our key research questions are whether multi-slicing makes trained mod-
+els more generalizable in a changing environment, which role training on
+samples from diﬀerent time slices plays, and what eﬀect the number of time
+slices has on performance.
+To answer these questions, we introduce multiple versions of single- and
+multi-slicing and compare predictive performance while varying the given
+2
+
+----- PÁGINA 3 -----
+time frame of data and the number of time slices. We facilitate the com-
+parison by suggesting a notation of time slices. We also derive how to use
+the multi-slicing approach in combination with cross-validation to allow for
+statistical testing.
+Using data from a large European convenience wholesaler, we bench-
+mark three classiﬁcation techniques and use the best performing one, ran-
+dom forests, to conduct our analyses regarding multi-slicing. We ﬁnd that
+training on multiple time slices increases predictive performance. We show
+that multi-slicing exploits a given time frame of data more eﬃciently than
+using a single time slice for training. We analyze diﬀerent versions of multi-
+slicing to isolate the eﬀects contributing to performance improvement. We
+ﬁnd that models trained with multi-slicing gain generalization capability
+even if the training set size is not increased. This indicates that there is
+inherent value in training on observations from multiple time slices. For our
+dataset, using more time slices in the training data enhances performance
+with the ﬁrst additional time slices resulting in the highest improvement.
+2. Literature review
+2.1. Churn prediction with classiﬁcation techniques
+Verbeke et al. (2011) and De Caigny et al. (2018) provide an overview on
+literature in churn prediction modeling. Benchmarking studies on classiﬁca-
+tion algorithms (Verbeke et al., 2012), data preparation techniques (Cousse-
+ment et al., 2017), and methods to handle class imbalance (Burez & Van den
+Poel, 2008; Zhu et al., 2017) show the variety of models that have been de-
+veloped to predict churn successfully. For insights into the time to churn for
+diﬀerent groups of customers or diﬀerent types of churn, alternate methods
+like survival analysis can be applied (Larivi` ere & Van Den Poel, 2004; Burez
+& Van den Poel, 2008). We focus on classiﬁcation algorithms to predict the
+customers that are likely to churn in the near future.
+Logistic regression, support vector machines, and random forests are
+among the most common classiﬁcation techniques and frequently used as
+benchmark classiﬁers (Garc´ ıa et al., 2017; De Caigny et al., 2018).
+Logistic regression is well-studied and typically serves as a benchmark
+in churn prediction studies (Coussement et al., 2017). It is a statistical
+technique ﬁtting a linear model to separate samples into two classes. Due
+3
+
+----- PÁGINA 4 -----
+to its low complexity, run times are low and interpretability is good. At
+the same time, complex relationships are diﬃcult to detect and interactions
+between features are diﬃcult to consider.
+Support vector machines (SVMs) aim for good generalization capabil-
+ity by maximizing the margin of samples to the decision boundary (Vap-
+nik, 1995). Several studies have focused on SVMs in churn prediction (e.g.
+Coussement & Van den Poel, 2008; Kumar & Ravi, 2008; Lessmann & Voß,
+2009) or used it as a benchmarking technique (Verbeke et al., 2011; Zhu
+et al., 2017).
+Random forests are an ensemble technique, creating multiple decision
+trees and giving the most frequent class decision as output. With bagging
+(bootstrap aggregating), the method can avoid overﬁtting by averaging over
+the opinion of many diﬀerent trees built on bootstrap samples (Breiman,
+2001). Various churn prediction studies indicate robust and good predictive
+performance of random forests (Buckinx & Van den Poel, 2005; Coussement
+& Van den Poel, 2008, 2009; Burez & Van den Poel, 2009; Verbeke et al.,
+2012).
+In churn prediction, class imbalance naturally occurs because churners
+are usually less frequent than non-churners. To deal with absolute and rela-
+tive rarity of the minority class, sampling and cost-sensitive learning are the
+most popular approaches (Weiss, 2004). Under-sampling discards samples
+from the majority class and over-sampling duplicates or constructs samples
+from the minority class to create a more balanced dataset. Synthetic Minor-
+ity Oversampling Technique (SMOTE) (Chawla et al., 2002) is a popular
+example. Sampling methods change the class distribution and sample size,
+whereas cost-sensitive learning deals with imbalance on an algorithm level
+by placing more weight on the minority class. Weiss (2004) recommends
+to use cost-sensitive learning because it does not discard valuable informa-
+tion and has been shown to perform better than under- and over-sampling
+(Japkowicz & Stephen, 2002). An example for a cost-sensitive learner are
+weighted random forests (Chen et al., 2004). They have been found to out-
+perform classic random forests in churn prediction (Burez & Van den Poel,
+2009).
+4
+
+----- PÁGINA 5 -----
+2.2. Model testing approaches
+Churn prediction model performance can be evaluated with two diﬀer-
+ent testing approaches: Out-of-sample testing evaluates a model on the same
+period it is trained on, splitting the available customer base into a subset
+used for training and a subset used for testing. Out-of-period testing evalu-
+ates a model on a more recent period than it is trained on, assessing model
+performance beyond the training time frame on data reserved as a hold-out
+test set.
+If market demand, pricing, customer behavior, competitive behavior and
+other factors that are relevant for customer churn are stable over time, out-
+of-sample and out-of-period testing yield similar results. If the environment
+and underlying drivers for churn change over time, an accurate assessment
+of predictive performance requires out-of-period testing.
+While out-of-sample testing is still the prevalent method in churn pre-
+diction literature, there are several studies that use out-of-period testing.
+Zahavi & Levin (1997) and Neslin et al. (2006) argue that out-of-period
+testing is necessary to assess how well a model performs on new data be-
+yond the training period. Wei & Chiu (2002) show that the predictive power
+of their model on telecommunications data is time-sensitive and already de-
+clines after one period. Burez & Van den Poel (2008) report similar results
+for pay-TV customer churn. For internet service provider and insurance
+data, Risselada et al. (2010) attribute the decrease in model performance
+over time to changing market conditions. Out-of-period testing has been
+applied more frequently in recent studies, such as Glady et al. (2009) (ﬁ-
+nancial services), Chen et al. (2012) (various datasets), Coussement & De
+Bock (2013) (online gambling) and ´Oskarsd´ ottir et al. (2017) (telecommu-
+nications).
+2.3. Model training with data from multiple periods
+Only few studies consider multiple time periods within the training data.
+G¨ ur Ali & Arıt¨ urk (2014) are one exception. They suggest a sampling frame-
+work that uses multiple samples per customer observed at diﬀerent points
+in time instead of the common approach with one sample per customer ob-
+served at one ﬁxed point in time. The framework is applied in the banking
+sector and the authors show that using multiple period training data can
+improve predictive performance over using only one period of training data.
+5
+
+----- PÁGINA 6 -----
+However, the analysis is restricted to one example with a ﬁxed number of pe-
+riods. The eﬀect of varying the training set size and the number of included
+periods on predictive performance is not investigated.
+Two recent studies have applied an approach similar to G¨ ur Ali &
+Arıt¨ urk (2014). Sepp¨ al¨ a & Thuy (2018) predict churn for housing loan
+customers and Leung & Chung (2020) for retail bank customers. Both pro-
+vide indications that training on multiple time slices improves predictive
+performance.
+The multi-slicing approach has shown promising results for speciﬁc ap-
+plications, but the approach has not been solidly analyzed, such that, for
+instance, the role of the training set size and the number of time slices is
+unclear. It has not yet been investigated whether performance improvement
+can be maintained even when the training set size is independent of the
+number of time slices, but samples come from multiple time slices. This
+is relevant for understanding the eﬀects which contribute to performance
+enhancement. It is also unclear, how predictive performance is aﬀected by
+the number of time slices used for training.
+3. Methodology
+For multi-slicing, transactional time-stamped data must be processed
+so that multiple time slices can be used for training. In the following, we
+introduce our notation for time slices and illustrate the concept of out-of-
+period testing (Section 3.1) before elaborating on the multi-slicing approach
+(Section 3.2).
+3.1. Time slices
+A time slice is an extract from the available data for a speciﬁc time frame.
+It contains both feature and label windows, with the forecasting origin t in
+between as a reference point.
+Relative to t, a time window w of previous data is used for calculating
+features on customer behavior during this time. A time window v of sub-
+sequent data is used for label creation regarding the churn of customers.
+The customer base of a time slice is the set C(t) of active customers at the
+forecasting origin t. For these customers, features and corresponding labels
+are computed.
+6
+
+----- PÁGINA 7 -----
+The feature matrix Xt consists of non-time-varying features and time-
+varying features per customer at time t. Non-time-varying features are typ-
+ically customer master data like region, shop type, or payment method.
+Time-varying features are generated from events during the time window w
+up to forecasting origin t such as invoices, deliveries, and customer relation-
+ship management (CRM) actions. For each customer i∈ C(t) considered
+at time t, a label yit is created based on the transactional data during the
+following time window v. The label yit is 1, if the behavior of customer i
+during v indicates churn, and 0 otherwise.
+The sample size varies over time depending on the number of active
+customers|C(t)|. Diﬀerent observations of the same customer can appear
+in diﬀerent time slices.
+We visualize the time slice concept in Figure 1 by showing the diﬀerent
+time slices used for training, testing, and prediction. We distinguish between
+the forecasting origins ttrain, ttest, and tpred.
+Forecasting origin
+Train Feature window 𝑤𝑤 Label window 𝑣𝑣
+Test
+TIME SLICES WITH OUT-OF-PERIOD TESTING
+Predict Feature window 𝑤𝑤 Forecasting
+𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡
+𝑡𝑡𝑝𝑝𝑡𝑡𝑝𝑝𝑝𝑝
+≥ 𝑡𝑡𝑡𝑡𝑝𝑝𝑡𝑡𝑡𝑡+ 𝑣𝑣
+Feature window 𝑤𝑤 Label window 𝑣𝑣time shift
+𝑡𝑡𝑡𝑡𝑝𝑝𝑡𝑡𝑡𝑡
+≥ 𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡+ 𝑣𝑣 Time 𝑡𝑡
+out-of-period
+1 training 
+time slice
+1 testing 
+time slice
+𝐶𝐶𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡
+𝐶𝐶𝑡𝑡𝑝𝑝𝑡𝑡𝑝𝑝𝑝𝑝
+𝐶𝐶𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑟𝑟𝑡𝑡𝑡𝑡𝑡𝑡𝑝𝑝𝑡𝑡𝑡𝑡
+Figure 1: Time slice concept illustrated with out-of-period testing
+One time slice is used for training the model with features derived from
+window w and labels from window v. A more recent time slice is used for
+testing, ensuring non-overlapping label windows. The testing time slice is
+shifted by v so that the forecasting origin of the test set is ttest≥ttrain +v.
+This results in testing on an out-of-period label window. The ﬁgure also
+shows that forecasting a future not yet seen can happen at the earliest at
+tpred≥ttest +v, after the known data has been used for training and testing.
+7
+
+----- PÁGINA 8 -----
+3.2. Multi-slicing
+Structuring available transactional data into time slices opens up the
+possibility of multi-slicing. With this concept multiple time slices can be
+generated and combined to one training set.
+With multi-slicing, customers are viewed at diﬀerent times ttrain
+k . The
+features and labels of each time slice k ∈ {1,··· ,K} are a snapshot of
+the customers at the forecasting origin ttrain
+k . The most recent slice views
+customers at ttrain
+K and the oldest slice views customers at ttrain
+1 shifted
+backwards by K− 1 periods. The training data set is constructed by a
+stacked feature matrix XK,ttrain = [Xttrain
+1
+··· Xttrain
+K
+]⊤ and a corresponding
+stacked label vector. XK,ttrain consists of up to ∑
+k|C(ttrain
+k )| rows. Note
+thatK− 1 additional periods of data are used for training on K time slices
+instead of only on one time slice.
+Figure 2 illustrates that the training set for multi-slicing consists of mul-
+tiple time slices. The time slices required for testing and potential prediction
+are also included.
+Feature window 𝑤𝑤 Label window 𝑣𝑣
+Feature window 𝑤𝑤 Label window 𝑣𝑣
+Feature window 𝑤𝑤 Label window 𝑣𝑣
+. . .
+Feature window 𝑤𝑤 Label window 𝑣𝑣
+𝑡𝑡𝐾𝐾−1
+𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡
+𝑡𝑡𝐾𝐾
+𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡
+𝑡𝑡1
+𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡
+𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡
+≥ 𝑡𝑡𝐾𝐾
+𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡+ 𝑣𝑣
+Train with
+𝐾𝐾slices
+Test
+. . .
+Predict Feature window 𝑤𝑤 Forecasting
+𝑡𝑡𝑝𝑝𝑡𝑡𝑡𝑡𝑝𝑝
+≥ 𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡+ 𝑣𝑣
+Multiple 
+training
+time slices
+𝐶𝐶𝑡𝑡1
+𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡
+𝐶𝐶𝑡𝑡𝑝𝑝𝑡𝑡𝑡𝑡𝑝𝑝
+𝐶𝐶𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑟𝑟𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡
+𝐶𝐶𝑡𝑡𝐾𝐾−1
+𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡
+𝐶𝐶𝑡𝑡𝐾𝐾
+𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡
+MULTI-SLICING
+Time 𝑡𝑡
+Forecasting origin
+1 testing 
+time slice
+Figure 2: Training on multiple time slices
+Our multi-slicing approach is neither an under-sampling technique nor an
+over-sampling technique. Instead, multi-slicing accesses more actual obser-
+vations from historical data of both the minority and majority class without
+changing the underlying class distribution. Creating time slices generates
+8
+
+----- PÁGINA 9 -----
+more samples and addresses the absolute rarity or lack of data issue while
+only moderately expanding the time horizon used. We thereby follow the
+recommendation by Weiss (2004) to not discard any data, but to use all
+information available. Multi-slicing facilitates learning on past churners and
+non-churners in addition to the most recent ones.
+3.3. Cross-validation with time slices
+For statistically testing our results, we derive a technique for conducting
+cross-validation with out-of-period testing while using multiple time slices
+within the training set. We consider two-fold cross-validation. The tech-
+nique entails partitioning the dataset into two equally sized subsets or folds
+which are each used once for testing.
+In each iteration j of cross-validation, it is essential that the subsets of
+customers used for training Cj(ttrain) and testing Cj(ttest) are not overlap-
+ping. It is not straightforward how to ensure this when applying out-of-
+period testing since diﬀerent observations of the same customers can appear
+in both training and testing time slice. We illustrate our approach for two-
+fold cross-validation in Figure 3.
+CROSS-VALIDATION WITH TIME SLICES FOR OUT-OF-PERIOD TESTING
+Iter. j=1 Iter. j=2
+Test
+Test
+Train
+Train
+Time 𝑡𝑡
+𝐶𝐶1 𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡
+𝐶𝐶2 𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡
+𝐶𝐶2 𝑡𝑡𝑡𝑡𝑒𝑒𝑒𝑒𝑡𝑡
+𝐶𝐶1 𝑡𝑡𝑡𝑡𝑒𝑒𝑒𝑒𝑡𝑡
+𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡 𝑡𝑡𝑡𝑡𝑒𝑒𝑒𝑒𝑡𝑡
+Figure 3: Deriving folds for 2-fold cross-validation with time slices for performing out-of-
+period testing
+The goal is to use each observation only once for testing, either in iter-
+ation 1 or in iteration 2 and to never train on customers that are also used
+for testing in the same iteration.
+The testing slice customers are assigned to two equally sized disjoint
+testing folds C1(ttest) and C2(ttest). The training slice customers are also
+divided into subsets, ensuring that customers used for testing in the same
+iteration are not included in the corresponding training subset. Customers
+in C1(ttest) that also appear in the (older) training slice are assigned to the
+9
+
+----- PÁGINA 10 -----
+opposite fold for training C2(ttrain) and vice versa. Customers that only
+appear in the training slice are randomly assigned to the two folds.
+In the ﬁrst iteration, a model is trained on C1(ttrain) and tested on
+C1(ttest) and in the second iteration, it is trained on C2(ttrain) and tested
+onC2(ttest). The subset of customers trained on and the subset of customers
+tested on are disjoint in each iteration:
+C1(ttrain)∩C1(ttest) = ∅ and C2(ttrain)∩C2(ttest) = ∅.
+We extend this to multi-slicing so that for each customer included in a
+testing fold, all previous observations of the customer are excluded from the
+corresponding training fold (see Figure 4). Customers that only appear in
+the training set are randomly assigned to one of the two training folds. The
+approach generates disjoint subsets of customers for training and testing in
+each iteration:(
+C1(ttrain
+1 )∪···∪ C1(ttrain
+K−1 )∪C1(ttrain
+K )
+)
+∩C1(ttest) = ∅ and(
+C2(ttrain
+1 )∪···∪ C2(ttrain
+K−1 )∪C2(ttrain
+K )
+)
+∩C2(ttest) = ∅
+CROSS-VALIDATION WITH TIME SLICES FOR MULTI-SLICING
+Train
+Train
+Iter. j=1 Iter. j=2 
+Test
+Test
+Train
+Train
+Train
+Train
+. . .
+. . .
+𝐶𝐶1 𝑡𝑡1
+𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡
+𝐶𝐶2 𝑡𝑡1
+𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡
+𝐶𝐶1 𝑡𝑡𝐾𝐾−1
+𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡
+𝐶𝐶2 𝑡𝑡𝐾𝐾−1
+𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡
+𝐶𝐶1 𝑡𝑡𝐾𝐾
+𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡
+𝐶𝐶2 𝑡𝑡𝐾𝐾
+𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡
+𝐶𝐶2 𝑡𝑡𝑡𝑡𝑒𝑒𝑒𝑒𝑡𝑡
+𝐶𝐶1 𝑡𝑡𝑡𝑡𝑒𝑒𝑒𝑒𝑡𝑡
+Time 𝑡𝑡𝑡𝑡1
+𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝐾𝐾−1
+𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝐾𝐾
+𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡 𝑡𝑡𝑡𝑡𝑒𝑒𝑒𝑒𝑡𝑡
+. . .
+Figure 4: Deriving folds for 2-fold cross-validation with multi-slicing
+4. Empirical study
+We develop a churn prediction model for one of Europe’s largest con-
+venience wholesalers (company) that sells beverages, tobacco, food, and
+other essential supplies to small convenience retail stores (customers). These
+business-to-business (B2B) customers can chose how frequently and which
+products they buy from the company. Customers can end the relation-
+ship without canceling a contract with the wholesaler. Deﬁning churn in a
+10
+
+----- PÁGINA 11 -----
+non-contractual setting such as ours is diﬃcult. The company experiences
+customer churn in terms of a substantial drop in revenue, known as partial
+defection (Buckinx & Van den Poel, 2005).
+In our study, the dataset contains around 5,000 active B2B customers.
+For feature creation, we use customer master data as well as data from trans-
+actional databases such as invoicing, delivery, and CRM. We include RFM
+variables (recency, frequency, and monetary value) and features speciﬁc to
+the industry.
+4.1. Dataset
+Our dataset spans 2.5 years (January 2017 - June 2019). We analyze
+the loyal customer base, which is of most interest to the company. The
+company considers a customer loyal, if he or she has been active for each
+of the previous 12 months and has a mean interpurchase time of at most
+two weeks. The customer base varies between 4945 and 5463 customers over
+time. We use a time period for feature computation of w = 12 months and
+v = 3 for labels. The earliest time slice has January 1st, 2018 as forecasting
+origin. Segmenting the data into multiple time slices, each shifted by one
+month, results in 16 possible forecasting origins to be used for training or
+testing (see Figure 5). Reserving the latest time slice for testing and ensuring
+that the label windows of training and testing are not overlapping leads to
+a training set that can encompass at most 13 time slices.
+2017 2018 2019
+Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec Jan Feb Mar Apr May Jun
+3
+2
+1
+Time slice for testing
+16
+Time slices for training
+13
+Feature window
+Label window
+Forecasting origin
+Figure 5: Available data horizon with time slices for training and testing
+11
+
+----- PÁGINA 12 -----
+4.2. Churn Deﬁnition
+Churn must be deﬁned to generate labels for the classiﬁcation task. In a
+non-contractual setting such as ours, deﬁning churn is not straightforward,
+because churn is not revealed by the termination of a contract. Customers
+do not necessarily churn abruptly at one distinctive point in time but often
+gradually move purchases to competitors. Since partial defection is a likely
+behavior of customers that will eventually churn completely, Buckinx & Van
+den Poel (2005) argue that it should be the prediction focus. Migu´ eis et al.
+(2012, 2013) use substantial decrease in purchase volumes as churn indicator.
+In our setting, we rely on expert domain knowledge from the company to
+identify partial defectors among the loyal customers, which have been reg-
+ularly active in each of the last 12 months. At the company, customers are
+considered churners, if their three-month spending fulﬁlls two conditions:
+ﬁrst, their spending decreases by at least 50% in any product segment com-
+pared to the previous three months and second, their total three-month
+spending decreases by at least 30% compared to the previous three months.
+0%
+5%
+10%
+15%
+2018/05
+2018/02
+2018/01
+Churn rate
+2018/04
+2018/03
+2019/02
+2018/06
+2018/07
+2018/08
+2018/09
+2018/10
+2018/11
+2018/12
+2019/03
+2019/01
+2019/04
+Figure 6: Seasonality of monthly churn rate
+Figure 6 indicates that the churn rate of the company ﬂuctuates around
+10% and exhibits seasonality. A varying level of churn suggests that con-
+ditions and behavior patterns also change over time, making out-of-period
+testing with a time shift between training and test set essential. It is also a
+reason to train on multiple time slices, because then conditions from diﬀer-
+ent time slices are included and overﬁtting to one particular point in time
+can be prevented.
+12
+
+----- PÁGINA 13 -----
+4.3. Features
+In close consultation with business experts from the company, we created
+features that are potential predictors of churn. The features can be grouped
+by their data source.
+Invoice data Recency, frequency, and monetary value (RFM) have been
+shown to be good churn predictors (Buckinx & Van den Poel, 2005; Bose &
+Chen, 2009; Migu´ eis et al., 2013; Tamaddoni Jahromi et al., 2014). We cal-
+culate the RFM features based on invoicing data from the 12 months before
+the forecasting origin. Values are normalized by customer speciﬁc monthly
+or quarterly means, which facilitates comparing customers and capturing
+trends. Volatility of values can be measured by the coeﬃcient of variation
+(CV). For interpurchase times (IPT), for instance, the CV is distributed
+diﬀerently for customers who stayed and customers who churned (Figure 7).
+The invoice data also reveals the number of product segments ordered from
+as well as credits, debits, and returns.
+10%
+12%
+0%
+8%
+2%
+4%
+6%
+IPT CV
+0.75
+Relative 
+frequency
+0.05 0.10 1.000.500.15 1.200.20 0.700.25 0.35 0.40 0.45 0.55 0.60 0.65 0.80 0.85 0.90 0.95 1.05 1.10 1.15 1.25 1.30 1.35 1.40 1.450.30
+stayed
+churned
+avg avg
+Figure 7: Coeﬃcient of variation of interpurchase times (IPT CV): Relative frequency of
+values by class
+Delivery data Both missing a communicated delivery time window and
+failing to deliver the full quantity of products ordered is considered poor
+delivery performance. We include both types of delivery failures separately
+in our features as well as on-time in-full (OTIF) as a combined measure.
+To enable comparability between customers, we divide the days with missed
+delivery windows by days ordered and the product value not delivered by
+total revenue of the customer. Chen et al. (2015) have shown for the case
+of a logistics company with B2B relationships, that the number of delivery
+failures divided by the total number of transactions is a valuable churn
+predictor.
+13
+
+----- PÁGINA 14 -----
+CRM data The company’s CRM system records contacts between sales
+agents and customers. We include the number of contacts via phone or
+in person and the days since the last contact as features that quantify the
+interactions between the company and the customers.
+Customer master data It has been found that the continuity of a cus-
+tomer relationship increases with its length (Anderson & Weitz, 1989). We
+include the length of the relationship and other features that the company
+believes are relevant for churn prediction such as region, store type or basic
+price level.
+We refer to Appendix A for a full list of feature types used and the
+variants created. Logistic regression and SVMs require features to vary on a
+similar scale, so rescaling preprocessing steps are required. We standardize
+the continuous features so that they have a mean of zero and unit variance
+in the training set. This preprocessing step is not necessary for random
+forests.
+5. Experimental setting
+We conduct our analyses with a churn prediction model using the most
+relevant features and the best performing of the three benchmark classiﬁ-
+cation techniques regularized logistic regression, linear SVM, and random
+forests on our dataset. We perform nested cross-validation with an inner
+loop to tune hyperparameters and an outer loop to report performance re-
+sults. We assess classiﬁcation performance with two evaluation metrics.
+To determine the beneﬁt of the multi-slicing technique, we compare it
+to diﬀerent versions of training on a single time slice. For insights into the
+eﬀect of sample size, we evaluate a downsized version of multi-slicing. We
+analyze the impact of the number of time slices by varying the slices included
+in the training set.
+5.1. Feature selection
+For feature selection, we run the classiﬁers with recursive feature elimi-
+nation (RFE). A wrapper approach like RFE has been shown to be superior
+to ﬁlter techniques (Kohavi & John, 1997; Somol et al., 2005). RFE was
+introduced for SVM (Guyon et al., 2002) and has been applied in the churn
+prediction domain by Lessmann & Voß (2009) and Farquad et al. (2014).
+Using backward elimination, RFE recursively removes the least important
+14
+
+----- PÁGINA 15 -----
+features and can be applied with diﬀerent classiﬁers on the basis of coeﬃ-
+cients or feature importance scores. Similarly to Verbeke et al. (2012), we
+determine the number of features to choose with the wrapper approach for
+each classiﬁer by evaluating the predictive performance (see Appendix B).
+5.2. Evaluation metrics
+We determine classiﬁer performance with two metrics that are estab-
+lished in the churn prediction domain: the area under the receiver operating
+curve (AUC) and top-decile lift (TDL) (Verbeke et al., 2012; De Bock &
+Van Den Poel, 2012; Coussement et al., 2017; De Caigny et al., 2018). Both
+are based on the confusion matrix. It measures for classiﬁcation tasks with
+binary labels (1: positives = churn, 0: negatives = no churn) how many
+predictions were correct (true positives (TP) and true negatives (TN)) and
+how many were incorrect (false positives (FP) and false negatives (FN)).
+The distribution of samples in the confusion matrix depends on the proba-
+bility threshold of the classiﬁer decision function. The following threshold-
+dependent measures can be calculated:
+True Positive Rate (TPR) = TP
+TP +FN
+False Positive Rate (FPR) = FP
+FP +TN
+The receiver operating curve (ROC) considers the trade-oﬀ between these
+two measures, with an increasing TPR coming at the cost of a higher FPR.
+The area under the curve provides a summarized performance measure
+across thresholds that can be used to compare models (Egan, 1975) and
+is calculated by approximating
+AUC =
+∫ 1
+0
+TPRdFPR .
+The resulting AUC value indicates how well the model is capable of distin-
+guishing between churners and non-churners. It ranges between 0 and 1 and
+can be interpreted as the probability that a randomly chosen churner has a
+higher score than a randomly chosen non-churner. A baseline model which
+assigns the class by chance therefore has an AUC score of 0.5.
+We also report TDL, another common measure that is especially relevant
+for practitioners who use a churn prediction model for selecting the top cus-
+15
+
+----- PÁGINA 16 -----
+tomers to target with retention activities. For this purpose the performance
+in the top decile is more important than the overall model capability. TDL
+evaluates how much better a model is at identifying churners among the top
+decile compared to randomly targeting customers. This is determined by
+assessing
+Lift =
+T P
+T P+F P
+β
+for the top decile, dividing the precision among the top 10% customers
+with the highest churn probabilities by the overall churn rate β. A TDL
+of 1 means, that the model has no beneﬁt over a baseline model which
+targets a random sample of customers. The maximum value achievable is
+1/β (Piatetsky-Shapiro & Masand, 1999).
+5.3. Model training
+We compare regularized logistic regression, linear SVM, and random
+forests to select the best performing technique for further analyses. For
+tuning the hyperparameters of each classiﬁcation method considered, we
+conduct cross-validation with ﬁve folds within the training data. We use
+stratiﬁcation to allocate samples from the two classes evenly to the validation
+sets. We apply grid search to iterate over combinations of reasonable values
+for the parameters (see Table 1) and select the best performing combination
+scored by AUC.
+For logistic regression with L2 regularization, which penalizes the squared
+feature weights, we test diﬀerent values for the regularization parameter. For
+a basic version of SVMs with a linear kernel, we also vary the regularization
+parameter during grid search.
+We control the complexity of our random forest model by varying the
+‘maximum number of features’ to consider when searching for the next best
+split and the ‘maximum tree depth’. For both parameters, low values de-
+crease the risk of overﬁtting. Since we also apply RFE, we use suitable
+ranges depending on the number of features F for grid search. To further
+reduce the risk of overﬁtting, we require at least two samples per leaf.
+Our dataset exhibits a high class imbalance with only around 10% of cus-
+tomers being churners. Since we analyze the impact of varying the training
+set size with multiple time slices on predictive performance, we do not use
+16
+
+----- PÁGINA 17 -----
+Table 1: Hyperparameters and ranges used during grid search
+Classiﬁer Hyperparameter Values
+Logistic regression penalty L2 regularization
+solver liblinear
+regularization C [10 −5,10−4,..., 102]
+class weight balanced
+SVM kernel linear
+regularization C [0 .2,0.3,..., 1.2]
+class weight balanced
+Random Forests max. number of features [ √F, 2√F, 3√F, min (F,4√F)]
+max. tree depth [3 ,..., min (F,15)]
+min. samples per leaf 2
+class weight balanced
+sampling methods that change this size such as under- or over-sampling but
+instead apply cost-sensitive versions of the classiﬁers. We use balanced class
+weights which are inversely proportional to the class frequency and thereby
+assign more weight to samples from the minority class. This implicitly leads
+to treating both classes as if they had similar sizes without changing the
+sample size.
+5.4. Cross-validation and statistical testing
+We apply nested cross-validation. While the hyperparameters are tuned
+with an inner cross-validated grid search, we report out-of-period test re-
+sults over an outer loop. We assess AUC and TDL performance over ﬁve
+replications of twofold cross-validation (5x2-fold cv) (Dietterich, 1998). This
+experimental set-up is popular in the churn prediction domain because it al-
+lows for statistical testing when comparing algorithms, testing methods or
+sampling techniques (e.g. Burez & Van den Poel, 2009; Coussement & De
+Bock, 2013; Ballings & Van Den Poel, 2015).
+In each iteration of two-fold cross-validation in the outer loop, we ensure
+that the customer subsets used for training and testing are non-overlapping.
+In Section 3.3, we describe how this is maintained when applying out-of-
+period testing and when training on multiple time slices within the training
+data.
+Results are analyzed for signiﬁcant diﬀerences by pairwise Wilcoxon
+signed-rank tests with the Bonferroni correction for multiple comparisons
+(Wilcoxon, 1945; Demˇ sar, 2006).
+17
+
+----- PÁGINA 18 -----
+5.5. Single- and multi-slicing versions
+We conduct experiments with diﬀerent versions of training on a single
+time slice (single-slicing) and on multiple time slices (multi-slicing). To
+assess the beneﬁt of the multi-slicing technique, we compare it to diﬀerent
+versions of training on a single time slice. For simple single-slicing, we use
+a 15 months time window ( w = 12 months and v = 3 months). Multi-
+slicing with time slices of the same length requires a longer time frame of
+data. To evaluate which method exploits a given time frame better, we make
+both methods comparable by extending the feature window of single-slicing
+accordingly (extended single-slicing).
+For example, a training time window of 18 months has three additional
+months of transactional data that can be used to either extend the feature
+creation window (w′ = 15 months) or to create multiple time slices. When
+shifting each time slice by one month, in total k = 4 time slices can be
+created out of 18 months of training data.
+To gain insight into the drivers of multi-slicing performance, we compare
+multi-slicing to a downsized version. Samples are randomly drawn from the
+multiple time slices available, but the training set size is limited to the
+number of samples in the single-slicing approach. We also prevent including
+more than one observation of customers that appear in multiple time slices
+to exclude any eﬀects this might have on performance. We refer to this
+approach as downsized multi-slicing.
+We use the following versions of single- and multi-slicing in our experi-
+ments:
+ Simple single-slicing as a baseline using only 12 months as feature
+window
+ Extended single-slicing using the maximum feature window size pos-
+sible with the given months of training data
+ Multi-slicing using as many time slices as possible, each with a feature
+window of 12 months and shifted by one month
+ Downsized multi-slicing using samples drawn from multiple time slices,
+downsized to sample size of latest training slice
+18
+
+----- PÁGINA 19 -----
+6. Results
+We ﬁrst select the best performing of the three classiﬁers considered
+(Section 6.1). We then focus on investigating multi-slicing and show that
+training on multiple time slices improves model performance (Section 6.2).
+We analyze how this is achieved by assessing the eﬀects of sample size and in-
+cluding samples from multiple time slices (Section 6.3). Next, we discuss how
+the number of time slices inﬂuences predictive performance (Section 6.4).
+6.1. Classiﬁer selection
+For an initial assessment of the churn prediction performance on our
+dataset we report 5x2-fold cross-validation results of the three benchmark
+classiﬁcation algorithms considered. We train on a single time slice and
+perform out-of-period testing on the most recent time slice with an average
+churn rate of 7.5%. All classiﬁers are substantially better at predicting
+ns
+**
+**
+0.65
+0.70
+Logistic 
+ regression
+SVM 
+ linear
+Random 
+ forest
+Classifier
+AUC
+pwc: Wilcoxon test; p.adjust: Bonferroni
+(a)
+**
+**
+ns
+2.5
+3.0
+3.5
+Logistic 
+ regression
+SVM 
+ linear
+Random 
+ forest
+Classifier
+TDL
+pwc: Wilcoxon test; p.adjust: Bonferroni (b)
+Figure 8: Boxplots of (a) AUC and (b) TDL estimates over 5x2-fold cv; Wilcoxon signed-
+rank test results for pairwise comparison of classiﬁers (p <0.1(*) p<0.05(**) p<0.01(***))
+churn than the baseline of a random model achieving an AUC of 0.5 and a
+TDL of 1. Figure 8 shows that the random forest classiﬁer ranks ﬁrst for
+both AUC and TDL. With random forest, churn of the B2B customers can
+be predicted well based on RFM features and features regarding CRM and
+delivery performance as the top predictors (Appendix C). The pairwise
+Wilcoxon signed-rank tests show that random forest performs signiﬁcantly
+19
+
+----- PÁGINA 20 -----
+better than SVM (AUC) and logistic regression (AUC, TDL). We therefore
+chose this method for all following analyses.
+Table 2: Random forest performance estimates (standard error) for out-of-sample and
+out-of-period testing methods over 5x2-fold cv.
+5x2-fold cv
+Metric Out-of-sample Out-of-period
+AUC 0.746 (0.012) 0.704 (0.012)
+TDL 3.296 (0.217) 2.856 (0.178)
+We report out-of-period results on a more recent time slice than the one
+used for training to reﬂect the temporal nature of our setting. The impact
+of changing conditions on predictive performance cannot be detected when
+training and testing on the same time slice with out-of-sample testing.
+We conﬁrm that our setting is exposed to a non-stable environment by
+comparing results obtained with out-of-sample and out-of-period testing for
+random forest (Table 2). Out-of-period results are signiﬁcantly lower, giving
+a more realistic estimate of classiﬁcation performance and indicating that
+generalization to a period not yet seen is diﬃcult.
+6.2. Performance enhancement with multi-slicing
+We analyze whether multi-slicing improves predictive performance in
+contrast to single-slicing and assess whether extended single-slicing or multi-
+slicing can exploit a given time window of data better. For four diﬀerent
+time windows of available data (18, 21, 24 and 27 months), we compare
+extending the feature creation window (extended single-slicing) to training
+on as many time slices as possible (multi-slicing). Simple single-slicing using
+a constant feature window of 12 months and a label window of 3 months
+serves as a baseline.
+Table 3 shows, that training on a single slice with an extended feature
+window does not necessarily lead to better results than the baseline of simple
+single-slicing with a feature window of 12 months. Performance is on a
+similar level, slightly better for AUC and slightly worse for TDL. There is
+no signiﬁcant diﬀerence between simple and extended single-slicing. Multi-
+slicing, however, boosts performance for all analyzed time windows. Multi-
+slicing results are signiﬁcantly higher than extended single-slicing results for
+both metrics (see Table 3). The longer the time window, the more slices
+20
+
+----- PÁGINA 21 -----
+Table 3: Average performance (standard error) over 5x2-fold cv for diﬀerent slicing tech-
+niques; Statistically signiﬁcant diﬀerence to extended single slicing: p <0.1(*) p<0.05(**)
+p<0.01(***) for Wilcoxon signed-rank test with Bonferroni correction
+Metric Time window Simple single-slicing Extended single-slicing Multi-slicing
+AUC 18 0.704 (0.012) 0.704 (0.014) 0.718 (0.013) **
+21 0.704 (0.012) 0.707 (0.016) 0.725 (0.016) **
+24 0.704 (0.012) 0.704 (0.018) 0.731 (0.016) ***
+27 0.704 (0.012) 0.709 (0.018) 0.732 (0.017) ***
+TDL 18 2.856 (0.178) 2.816 (0.244) 3.376 (0.259) **
+21 2.856 (0.178) 2.842 (0.204) 3.443 (0.249) ***
+24 2.856 (0.178) 2.749 (0.233) 3.697 (0.190) **
+27 2.856 (0.178) 2.829 (0.320) 3.750 (0.227) **
+can be used (18 months: 4 slices, 21: 7, 24: 10 and 27: 13). Multi-slicing
+improves AUC by 2.1% to 4.0%, reaching values between 0.718 and 0.732.
+TDL is much higher with multi-slicing, exhibiting an increase between 18.2%
+and 31.3%. It is evident that multi-slicing exploits a given time frame better
+than single-slicing, leading to more accurate churn predictions.
+6.3. Eﬀects of sample size and including samples from multiple time slices
+Machine learning algorithms generally perform better with more samples
+to train on. Therefore, the previous results lead to the following questions:
+What drives the performance improvement of multi-slicing? Is the improve-
+ment just due to training on a larger sample size? Or is there a unique
+beneﬁt in training on observations from diﬀerent time slices?
+To isolate the two eﬀects, we compare multi-slicing to a downsized ver-
+sion that limits the number of samples drawn from multiple time slices to
+that of a single slice. Downsized multi-slicing reveals the eﬀect that stems
+from training on samples from diﬀerent time slices. The eﬀect of a larger
+training set size can be observed by evaluating the diﬀerence between the
+original multi-slicing and the downsized version.
+Figure 9 (a) visualizes the development in training set size for the two
+versions: For multi-slicing the sample size almost multiplies with the number
+of slices while for downsized multi-slicing it stays the same.
+If the multi-slicing eﬀect was only driven by sample size, charts (b) and
+(c) would show a ﬂat line for the downsized version as in chart (a). Instead,
+the downsized version of multi-slicing improves AUC and TDL performance
+compared to single-slicing with the same sample size (represented by the
+point at number of time slices = 1). When testing on the latest time slice,
+21
+
+----- PÁGINA 22 -----
++0.0%
+2 90
+40,000
+71 3 64 5 8 10 11 12 13
+0
+10,000
+20,000
+30,000
+Training
+set size
+Number of time slices
++1,221.0%
+(a)
++1.8%
+32 4 5 6 127 8 9 10 111
+0.71
+0.72
+13
+0.73
+0.74
+0
+0.01
+Number of time slices
+AUC
++4.0% (b)
+4.0
+0 2 3 4 5 6 7 8 9 10 11 12 13
+0.0
+3.0
+3.2
+3.4
+3.6
+3.8
+1
+TDL
+Number of time slices
++31.3%
+Downsized multi-slicing
+Multi-slicing
++16.8% (c)
+Figure 9: Performance of AUC and TDL compared to training set size under varying
+number of time slices used in multi-slicing
+the time span available in our dataset allows for training on a maximum of
+13 time slices. Downsized multi-slicing achieves 1.8% higher AUC and 16.8%
+higher TDL. The original version of multi-slicing performs even better, im-
+proving AUC by 4.0% and TDL by 31.3%. We conclude that improvement
+by multi-slicing is driven by both: Training on samples from diﬀerent time
+slices and increased sample size.
+6.4. Impact of number of time slices
+Next, we evaluate, how many time slices should be included in the train-
+ing data. Looking at the development of AUC and TDL over the number of
+time slices in Figure 9 (b) and (c), multi-slicing and downsized multi-slicing
+exhibit a similar pattern. Adding only a few recent time slices already in-
+creases performance substantially for both versions. Afterwards, not every
+additional slice leads to better performance but an upwards trend is ob-
+servable. Performance generally increases with the number of slices, but
+the marginal beneﬁt decreases. While most of the beneﬁt can already be
+achieved with adding a few time slices, we recommend to include as many
+time slices as possible.
+7. Conclusion
+With a random forest churn prediction model, we compare training on
+multiple time slices to training on one time slice of data. The multi-slicing
+approach uses available data more eﬃciently and performs better. We com-
+pare single- and multi-slicing as well as diﬀerent versions of multi-slicing
+to detect the underlying eﬀects. Our results indicate that both increased
+22
+
+----- PÁGINA 23 -----
+sample size and training on observations from diﬀerent time slices enhance
+predictive performance.
+We show that training on multiple time slices signiﬁcantly improves AUC
+and TDL results compared to single-slicing. A given time window of training
+data is better exploited by constructing multiple time slices to train on than
+by extending the feature time window.
+We investigate two possible reasons for the performance increase: In-
+creased sample size and training on samples from diﬀerent time slices. We
+eliminate the sample size eﬀect by comparing multi-slicing to a downsized
+version. This version still leads to a substantial performance improvement.
+It shows that there is unique beneﬁt in training on observations from diﬀer-
+ent time slices that goes beyond increased sample size. Multi-slicing enables
+training on data from more than just the most recent time slice and prevents
+overﬁtting to the situation of one speciﬁc time slice. Therefore, models can
+better generalize and predict future churners. The increased sample size
+leads to even higher improvement, addressing the absolute rarity issue by
+training on more churn samples from the past. While the ﬁrst time slices
+have the strongest impact, we recommend to include as many time slices as
+possible.
+While training and testing on only one time slice is still the most common
+approach in churn prediction we highly recommend to test a churn prediction
+model beyond the training time frame. This assesses performance more reli-
+ably in situations with a changing environment. Under such conditions, our
+results demonstrate that multi-slicing is particularly valuable and obtains
+good out-of-period performance results.
+Going forward, it would be interesting to analyze whether our results
+generalize to other churn prediction problems and even to classiﬁcation prob-
+lems from other domains relying on time series data. When the problem sit-
+uation varies over time, training on multiple time slices makes models more
+robust. Multi-slicing achieves better predictive performance by training on
+more samples and increasing the generalization capability. However, further
+studies need to be conducted to verify the eﬀect on diﬀerent case data.
+References
+Anderson, E., & Weitz, B. (1989). Determinants of Continuity in Conven-
+tional Industrial Channel Dyads. Marketing Science, 8, 310–323.
+23
+
+----- PÁGINA 24 -----
+Ballings, M., & Van den Poel, D. (2012). Customer event history for churn
+prediction: How long is long enough? Expert Systems with Applications ,
+39, 13517–13522.
+Ballings, M., & Van Den Poel, D. (2015). CRM in social media: Predicting
+increases in Facebook usage frequency. European Journal of Operational
+Research, 244, 248–260.
+Bose, I., & Chen, X. (2009). Quantitative models for direct marketing: A
+review from systems perspective. European Journal of Operational Re-
+search, 195, 1–16.
+Breiman, L. (2001). Random forests. Machine Learning, 45, 5–32.
+Buckinx, W., & Van den Poel, D. (2005). Customer base analysis: Partial
+defection of behaviourally loyal clients in a non-contractual FMCG retail
+setting. European Journal of Operational Research, 164, 252–268.
+Burez, J., & Van den Poel, D. (2007). CRM at a pay-TV company: Using
+analytical models to reduce customer attrition by targeted marketing for
+subscription services. Expert Systems with Applications , 32, 277–288.
+Burez, J., & Van den Poel, D. (2008). Separating ﬁnancial from commercial
+customer churn: A modeling step towards resolving the conﬂict between
+the sales and credit department. Expert Systems with Applications , 35,
+497–514.
+Burez, J., & Van den Poel, D. (2009). Handling class imbalance in customer
+churn prediction. Expert Systems with Applications , 36, 4626–4636.
+Chawla, N. V., Bowyer, K. W., Hall, L. O., & Kegelmeyer, W. P. (2002).
+SMOTE: Synthetic Minority Over-sampling Technique. Journal of Arti-
+ﬁcial Intelligence Research, 16, 321–357.
+Chen, C., Liaw, A., & Brieman, L. (2004). Using random forest to learn
+imbalanced data: Technical Report No. 666. University of California,
+Berkley. Using Random Forest to Learn Imbalanced Data , 110, 12.
+Chen, K., Hu, Y.-H., & Hsieh, Y.-C. (2015). Predicting customer churn
+from valuable B2B customers in the logistics industry: a case study. In-
+formation Systems and e-Business Management , 13, 475–494.
+24
+
+----- PÁGINA 25 -----
+Chen, Z.-Y., Fan, Z.-P., & Sun, M. (2012). A hierarchical multiple kernel
+support vector machine for customer churn prediction using longitudinal
+behavioral data. European Journal of Operational Research , 223, 461–
+472.
+Coussement, K., & De Bock, K. W. (2013). Customer churn prediction in
+the online gambling industry: The beneﬁcial eﬀect of ensemble learning.
+Journal of Business Research , 66, 1629–1636.
+Coussement, K., Lessmann, S., & Verstraeten, G. (2017). A comparative
+analysis of data preparation algorithms for customer churn prediction: A
+case study in the telecommunication industry. Decision Support Systems,
+95, 27–36.
+Coussement, K., & Van den Poel, D. (2008). Churn prediction in subscrip-
+tion services: An application of support vector machines while comparing
+two parameter-selection techniques. Expert Systems with Applications ,
+34, 313–327.
+Coussement, K., & Van den Poel, D. (2009). Improving customer attrition
+prediction by integrating emotions from client/company interaction emails
+and evaluating multiple classiﬁers. Expert Systems with Applications , 36,
+6127–6134.
+De Bock, K. W., & Van Den Poel, D. (2012). Reconciling performance
+and interpretability in customer churn prediction using ensemble learning
+based on generalized additive models. Expert Systems with Applications ,
+39, 6816–6826.
+De Caigny, A., Coussement, K., & De Bock, K. W. (2018). A new hybrid
+classiﬁcation algorithm for customer churn prediction based on logistic
+regression and decision trees. European Journal of Operational Research,
+269, 760–772.
+Demˇ sar, J. (2006). Statistical Comparisons of Classiﬁers over Multiple Data
+Sets. Journal of Machine Learning Research , 7, 1–30.
+Dietterich, T. G. (1998). Approximate Statistical Tests for Comparing Su-
+pervised Classiﬁcation Learning Algorithms. Neural Computation , 10,
+1895–1923.
+25
+
+----- PÁGINA 26 -----
+Egan, J. P. (1975). Signal detection theory and ROC-analysis. In Series in
+Cognition and Perception. Academic press.
+Farquad, M. A., Ravi, V., & Raju, S. B. (2014). Churn prediction using
+comprehensible support vector machine: An analytical CRM application.
+Applied Soft Computing Journal , 19, 31–40.
+Garc´ ıa, D. L., Nebot, `A., & Vellido, A. (2017). Intelligent data analysis
+approaches to churn as a business problem: a survey. Knowledge and
+Information Systems , 51, 719–774.
+Glady, N., Baesens, B., & Croux, C. (2009). Modeling churn using customer
+lifetime value. European Journal of Operational Research, 197, 402–411.
+G¨ ur Ali,¨O., & Arıt¨ urk, U. (2014). Dynamic churn prediction framework
+with more eﬀective use of rare event data: The case of private banking.
+Expert Systems with Applications , 41, 7889–7903.
+Guyon, I., Weston, J., Barnhill, S., & Vapnik, V. (2002). Gene selection for
+cancer classiﬁcation using support vector machines. Machine Learning ,
+46, 389–422.
+Janitza, S., Strobl, C., & Boulesteix, A. L. (2013). An AUC-based permu-
+tation variable importance measure for random forests. BMC Bioinfor-
+matics, 14, 119.
+Japkowicz, N., & Stephen, S. (2002). The class imbalance problem: A
+systematic study. Intelligent Data Analysis , 6, 429–449.
+Kohavi, R., & John, G. H. (1997). Wrappers for feature subset selection.
+Artiﬁcial Intelligence , 97, 273–324.
+Kumar, D. A., & Ravi, V. (2008). Predicting credit card customer churn in
+banks using data mining. International Journal of Data Analysis Tech-
+niques and Strategies , 1, 4–28.
+Larivi` ere, B., & Van Den Poel, D. (2004). Investigating the role of prod-
+uct features in preventing customer churn, by using survival analysis and
+choice modeling: The case of ﬁnancial services. Expert Systems with Ap-
+plications, 27, 277–285.
+26
+
+----- PÁGINA 27 -----
+Larivi` ere, B., & Van den Poel, D. (2005). Predicting customer retention and
+proﬁtability by using random forests and regression forests techniques.
+Expert Systems with Applications , 29, 472–484.
+Lessmann, S., & Voß, S. (2009). A reference model for customer-centric data
+mining with support vector machines. European Journal of Operational
+Research, 199, 520–530.
+Leung, H. C., & Chung, W. (2020). A Dynamic Classiﬁcation Approach to
+Churn Prediction in Banking Industry. In AMCIS 2020 Proceedings Data
+Science and Analytics for Decision Support (SIGDSA) . Association for
+Information Systems.
+Migu´ eis, V., Camanho, A., & Falc˜ ao e Cunha, J. (2013). Customer attrition
+in retailing: An application of Multivariate Adaptive Regression Splines.
+Expert Systems with Applications , 40, 6225–6232.
+Migu´ eis, V., Van den Poel, D., Camanho, A., & Falc˜ ao e Cunha, J. (2012).
+Modeling partial customer churn: On the value of ﬁrst product-category
+purchase sequences. Expert Systems with Applications , 39, 11250–11256.
+Neslin, S. A., Gupta, S., Kamakura, W., Lu, J., & Mason, C. H. (2006). De-
+fection Detection: Measuring and Understanding the Predictive Accuracy
+of Customer Churn Models. Journal of Marketing Research, 43, 204–211.
+´Oskarsd´ ottir, M., Bravo, C., Verbeke, W., Sarraute, C., Baesens, B., & Van-
+thienen, J. (2017). Social network analytics for churn prediction in telco:
+Model building, evaluation and network architecture. Expert Systems with
+Applications, 85, 204–220.
+Piatetsky-Shapiro, G., & Masand, B. (1999). Estimating campaign beneﬁts
+and modeling lift. In Proceedings of the ﬁfth ACM SIGKDD international
+conference on Knowledge discovery and data mining - KDD ’99 (pp. 185–
+193). New York, New York, USA: ACM Press.
+Reichheld, F. F. (1996). Learning from Customer Defections. Harvard busi-
+ness review , 74, 56–69.
+Risselada, H., Verhoef, P. C., & Bijmolt, T. H. (2010). Staying Power of
+Churn Prediction Models. Journal of Interactive Marketing , 24, 198–208.
+27
+
+----- PÁGINA 28 -----
+Sepp¨ al¨ a, T., & Thuy, L. (2018). A combination of multi-period training
+data and ensemble methods to improve churn classiﬁcation of housing
+loan customers. In Proceedings of the 2nd International Conference on
+Advanced Research Methods and Analytics (CARMA 2018)(pp. 141–144).
+Universidad Polit` ecnica de Val` encia.
+Somol, P., Baesens, B., Pudil, P., & Vanthienen, J. (2005). Filter- versus
+wrapper-based feature selection for credit scoring. International Journal
+of Intelligent Systems , 20, 985–999.
+Tamaddoni Jahromi, A., Stakhovych, S., & Ewing, M. (2014). Managing
+B2B customer churn, retention and proﬁtability. Industrial Marketing
+Management, 43, 1258–1268.
+Vapnik, V. N. (1995). The nature of statistical learning theory . Springer,
+New York, NY.
+Verbeke, W., Dejaeger, K., Martens, D., Hur, J., & Baesens, B. (2012). New
+insights into churn prediction in the telecommunication sector: A proﬁt
+driven data mining approach. European Journal of Operational Research,
+218, 211–229.
+Verbeke, W., Martens, D., Mues, C., & Baesens, B. (2011). Building compre-
+hensible customer churn prediction models with advanced rule induction
+techniques. Expert Systems with Applications , 38, 2354–2364.
+Wei, C.-P., & Chiu, I.-T. (2002). Turning telecommunications call details
+to churn prediction: a data mining approach. Expert Systems with Appli-
+cations, 23, 103–112.
+Weiss, G. M. (2004). Mining with Rarity: A Unifying Framework. SIGKDD
+Explorations, 6, 7–19.
+Wilcoxon, F. (1945). Individual Comparisons by Ranking Methods. Bio-
+metrics Bulletin 1 , 6, 80–83.
+Zahavi, J., & Levin, N. (1997). Applying neural computing to target mar-
+keting. Journal of Direct Marketing , 11, 5–22.
+Zeithaml, V. A., Berry, L. L., & Parasuraman, A. (1996). The Behavioral
+Consequences of Service Quality. Source: Journal of Marketing , 60, 31–
+46.
+28
+
+----- PÁGINA 29 -----
+Zhu, B., Baesens, B., Backiel, A., & Vanden Broucke, S. K. (2017). Bench-
+marking sampling techniques for imbalance learning in churn prediction.
+Journal of the Operational Research Society , 69, 49–65.
+29
+
+----- PÁGINA 30 -----
+Appendix A. F eatures
+Table A.4: Features used in this study
+Source and feature type Feature variants / calculations
+Invoice data - Monetary
+Revenue per segment / total
+Revenue (monthly) mean, std, coeﬃcient of variation (CV),
+X-to-last month / mean
+Revenue (quarterly) total and per segment: mean, std, CV,
+X-to-last quarter / mean
+Invoice data - Recency
+Interpurchase time (IPT) mean, std, CV, max, last / mean
+Invoice data - F requency
+Days ordered (monthly) total and per segment: mean, std, CV,
+X-to-last month / mean, last 1-3 weeks
+Days ordered (quarterly) mean, std, CV, X-to-last quarter / mean
+Invoice data - Product segments
+Number of segments ordered from monthly mean, std, CV, last month / mean
+Main order type categorical: online shop, phone, fax, email etc.
+Invoice data - Credit / Debit / Returns
+Credit / Debit / Returns total amount / total revenue, total days / days ordered
+Days since last credit, debit, return, order
+Invoice data - Margin
+Margin of customer total, per segment: diﬀerence to recommended selling prices
+Margin of company total, per segment: diﬀerence to internal purchase prices
+Delivery performance
+Number of days with missing quantities total, monthly mean, last and second last month
+Product value not delivered total, monthly mean, last and second last month,
+ratio to revenue
+Number of days with missed time window total, early, late, monthly means, ratio to days ordered
+Hours late / early max, mean, std, sum last and second last month
+On-time in-full (OTIF) total, last, second last and third last month
+Delivery mostly by service provider categorical: yes / no
+CRM
+Number of contacts with sales representative in person, with phone agent
+Days since last contact with sales representative in person, with phone agent
+Customer master data
+Region ﬁrst two digits of postal code
+Basic price level conditions of master agreement
+Parcel customer categorical: yes / no
+Type of store categorical: convenience shop, beverage shop, tobacco shop, etc.
+Length of relationship since customer account creation
+Length of master agreement since latest renewal
+Payment method categorical: direct debit, cash etc.
+Assigned warehouse diﬀerent facilities
+30
+
+----- PÁGINA 31 -----
+Appendix B. Details on feature selection
+Feature selection is done with recursive feature elimination (RFE). For
+each classiﬁer, we determine the number of features that leads to the highest
+AUC in a pre-analysis. Figures B.10 (a)-(c) show that random forests work
+best with 20-50 features (32 selected), logistic regression with 70-100 features
+(84 selected), and support vector machines with 35-55 features (38 selected).
+0 20 40 60 80 100 120 140 160 180 200 220 240 260 280 300 320 340 360
+0.735
+0.740
+0.730
+Number of features
+AUC
+(a)
+0 20 40 60 80 100 120 140 160 180 200 220 240 260 280 300 320 340 360
+0.650
+0.675
+0.700
+0.725
+Number of features
+AUC
+(b)
+0.660
+0.675
+0.690
+0.705
+0 20 40 60 80 100 120 140 160 180 200 220 240 260 280 300 320 340 360
+Number of features
+AUC
+(c)
+Figure B.10: Performance (AUC) of (a) random forest, (b) logistic regression, (c) SVM
+algorithm using recursive feature elimination (RFE) for varying number of features
+31
+
+----- PÁGINA 32 -----
+Appendix C. F eature importances
+We report permutation-based feature importance scores for random for-
+est which are obtained by calculating the decrease in AUC when the feature
+values are shuﬄed (Breiman, 2001; Janitza et al., 2013). By breaking the
+connection to the label for a speciﬁc feature, the method provides an indica-
+tion of its relevance. We average over the ten scores obtained with 5x2-fold
+cv. The ranking of features conﬁrms that recency, frequency, and monetary
+value remain top predictors of churn in a B2B context. Table C.5 shows
+that among the most important features are the development of revenue in
+the last month and quarter and the coeﬃcient of variation (CV) of monthly
+and quarterly revenue. Among the top ten features is also the recency of
+the last order compared to the mean interpurchase time. The frequency of
+orders is relevant both in terms of recent development and CV. The features
+regarding revenue development and CV in the largest segment tobacco also
+rank high. Features that are speciﬁc to the B2B context are also important
+to the model. Delivery performance variables such as product value not
+delivered in last month and number of days in the last month with missing
+quantities are among the top features. This indicates that delivery perfor-
+mance is linked to customer satisfaction and potential churn. The most
+relevant feature from CRM data is the recency of the last contact with a
+sales representative in person. The margin of the company which is a proxy
+for the customer’s proﬁt is also a relevant predictor. Customer master data
+like the region provide additional valuable information.
+Table C.5: Permutation importance of features with random forest
+# Name of feature Source: Category
+Mean
+decrease
+AUC
+1 Coeﬃcient of variation (CV) of monthly
+revenue
+Invoice data: Monetary 0.017395
+2 Revenue in last month / monthly mean Invoice data: Monetary 0.014515
+3 Product value not delivered in last month Delivery Performance 0.005216
+4 Revenue in last quarter / quarterly mean Invoice data: Monetary 0.004087
+5 Number of days with missing quantities in
+last month
+Delivery Performance 0.003880
+6 Revenue in 3rd-to-last month / monthly
+mean
+Invoice data: Monetary 0.003657
+32
+
+----- PÁGINA 33 -----
+Table C.5: Permutation importance of features with random forest - continued
+# Name of feature Source: Category
+Mean
+decrease
+AUC
+7 CV of monthly number of segments or-
+dered from
+Invoice data: Segments 0.003191
+8 CV of quarterly revenue in tobacco seg-
+ment
+Invoice data: Monetary 0.002539
+9 Last IPT / mean IPT Invoice data: Recency 0.002391
+10 CV of quarterly revenue Invoice data: Monetary 0.002180
+11 Days ordered in 3th-to-last month /
+monthly mean
+Invoice data: Frequency 0.001910
+12 Revenue in 3nd-to-last quarter / quarterly
+mean
+Invoice data: Monetary 0.001883
+13 Revenue in tobacco segment in 2nd-to-last
+quarter / quarterly mean
+Invoice data: Monetary 0.001775
+14 Product value not delivered / total rev-
+enue
+Delivery Performance 0.001413
+15 CV of quarterly revenue in miscellaneous
+segment
+Invoice data: Monetary 0.001340
+16 Revenue in 2nd-to-last quarter / quarterly
+mean
+Invoice data: Monetary 0.001279
+17 Number of days ordered in miscellaneous
+segment / number of days ordered
+Invoice data: Frequency 0.001243
+18 Days ordered in last month / monthly
+mean
+Invoice data: Frequency 0.001149
+19 Revenue in 4th-to-last month / monthly
+mean
+Invoice data: Monetary 0.001080
+20 Revenue in tobacco segment in 3rd-to-last
+quarter / quarterly mean
+Invoice data: Monetary 0.000940
+21 Revenue in 9th-to-last month / monthly
+mean
+Invoice data: Monetary 0.000930
+22 Region (ﬁrst two digits of postal code) Customer master data 0.000810
+23 On-time-in-full (OTIF) Delivery Performance 0.000782
+24 CV of monthly days ordered Invoice data: Frequency 0.000781
+25 Revenue in 8th-to-last month / monthly
+mean
+Invoice data: Monetary 0.000697
+26 Revenue in 10th-to-last month / monthly
+mean
+Invoice data: Monetary 0.000661
+27 Revenue in 2nd-to-last month / monthly
+mean
+Invoice data: Monetary 0.000630
+28 CV of IPT Invoice data: Recency 0.000522
+33
+
+----- PÁGINA 34 -----
+Table C.5: Permutation importance of features with random forest - continued
+# Name of feature Source: Category
+Mean
+decrease
+AUC
+29 Std of monthly number of segments or-
+dered from
+Invoice data: Segments 0.000363
+30 Days since last contact with sales repre-
+sentative
+CRM data 0.000340
+31 Margin of company Invoice data: Margin 0.000331
+32 Quarterly mean of revenue in tobacco seg-
+ment
+Invoice data: Monetary 0.000243
+34
