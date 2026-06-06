@@ -1,0 +1,10 @@
+{
+  "best_params": {
+    "C": 0.03277622927423502,
+    "l1_ratio": 0.43968429924639924
+  },
+  "best_value_cv_auc_trainpool": 0.739410292897139,
+  "oot_auc": 0.7692604191761022,
+  "n_trials": 60,
+  "random_state": 42
+}

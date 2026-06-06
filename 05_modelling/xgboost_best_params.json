@@ -1,0 +1,17 @@
+{
+  "best_params": {
+    "n_estimators": 950,
+    "max_depth": 3,
+    "learning_rate": 0.011011952680452656,
+    "subsample": 0.821741761207133,
+    "colsample_bytree": 0.8024943946508585,
+    "min_child_weight": 15,
+    "gamma": 2.200893624894427,
+    "reg_alpha": 0.004938288434068096,
+    "reg_lambda": 0.25855890817792654
+  },
+  "best_value_cv_auc_trainpool": 0.742238800733774,
+  "oot_auc": 0.7648197221553039,
+  "n_trials": 60,
+  "random_state": 42
+}

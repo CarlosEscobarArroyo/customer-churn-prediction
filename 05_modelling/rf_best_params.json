@@ -1,0 +1,14 @@
+{
+  "best_params": {
+    "n_estimators": 350,
+    "max_depth": 10,
+    "max_features": 0.1638581982754919,
+    "min_samples_leaf": 28,
+    "min_samples_split": 6,
+    "max_samples": 0.590664012982737
+  },
+  "best_value_cv_auc_trainpool": 0.7398756183285944,
+  "oot_auc": 0.7589817714606922,
+  "n_trials": 60,
+  "random_state": 42
+}
