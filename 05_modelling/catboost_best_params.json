@@ -1,0 +1,17 @@
+{
+  "best_params": {
+    "iterations": 1050,
+    "depth": 3,
+    "learning_rate": 0.01784848406762097,
+    "l2_leaf_reg": 3.475554880790744,
+    "random_strength": 0.0193673868449059,
+    "subsample": 0.791500027226696,
+    "rsm": 0.7086150829006931,
+    "min_data_in_leaf": 18,
+    "border_count": 82
+  },
+  "best_value_cv_auc_trainpool": 0.7423859512689551,
+  "oot_auc": 0.7652372922187425,
+  "n_trials": 60,
+  "random_state": 42
+}
