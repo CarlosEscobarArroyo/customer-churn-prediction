@@ -22,6 +22,21 @@
 --         n ∈ {1,3,6,9,12} (último mes, trimestre, 2/3 trimestres, año), vía
 --         LAG sobre el panel denso. Cuantifican el cambio mes a mes; NULL si no
 --         hay historia suficiente → el preprocessing las imputa a 0.
+--   • FEATURES NUEVAS (2026-09; motivación: LogReg empata a RF/XGB y el tuning
+--     y el horizonte k no mueven el AUC → el cuello de botella es información,
+--     no algoritmo). Todas COALESCE a 0/1 en el SQL: no requieren imputación.
+--       - CAMPAÑAS: frecuencia a granularidad campaña. Desde 2025 hay 2-3
+--         campañas simultáneas por mes, así que "meses activos" subestima el
+--         engagement. Cada campaña se asigna al mes de su primer pedido (evita
+--         las fechas invertidas de dim_campana). camp_saltadas = campañas entre
+--         la anterior participación y la vigente (recencia en campañas);
+--         tasa_camp_uN = campañas participadas / campañas con pedidos en la
+--         ventana. También mix de tipo de pedido (Directo vs Catalogo) y flag
+--         es_nueva_vendedora en los últimos 12 meses.
+--       - Se evaluaron además familias de PAGO (ratio monto_pagado/monto), RED
+--         (líder/grupo/equipo vía ccodrelacion) y MIX de producto (categorías,
+--         unidades, precio unitario): ninguna movió el AUC en la ablación y se
+--         descartaron (ver 05_modelling/experimentos/reports/features_nuevas_ablation.md).
 --   • ETIQUETA (sin churn parcial por %): churn = 1 si la vendedora NO compra
 --     en NINGUNO de los próximos 6 meses. NULL/excluida si no hay 6 meses de
 --     futuro observables (censura a la derecha).
@@ -44,13 +59,15 @@ ped AS (
     fp.id_vendedor,
     DATE_TRUNC(df.date, MONTH)        AS mes,
     COUNT(*)                          AS n_ped,
-    SUM(fp.monto_total_pedido)        AS monto
+    SUM(fp.monto_total_pedido)        AS monto,
+    COUNTIF(fp.tipo = 'Directo')      AS n_ped_directo,   -- CAMPAÑAS: mix de tipo
+    SUM(fp.es_nueva_vendedora)        AS n_ped_nueva
   FROM `glamour-peru-dw.glamour_dw.fact_pedidos` fp
   JOIN `glamour-peru-dw.glamour_dw.dim_fecha`    df USING (id_fecha)
   GROUP BY 1, 2
 ),
 
--- Diversidad de producto por (vendedora, mes); huérfano -> 'Ropa' --------------
+-- Diversidad de producto por (vendedora, mes); huérfano -> 'Ropa' -------------
 prod AS (
   SELECT
     fd.id_vendedor,
@@ -60,6 +77,42 @@ prod AS (
   FROM `glamour-peru-dw.glamour_dw.fact_pedidos_detalle` fd
   JOIN `glamour-peru-dw.glamour_dw.dim_fecha`            df USING (id_fecha)
   LEFT JOIN `glamour-peru-dw.glamour_dw.dim_producto`    dp USING (id_producto)
+  GROUP BY 1, 2
+),
+
+-- CAMPAÑAS: cada campaña se asigna al mes de su primer pedido; rank cronológico
+camp AS (
+  SELECT id_campana, mes_camp,
+         ROW_NUMBER() OVER (ORDER BY mes_camp, id_campana) AS camp_rank
+  FROM (
+    SELECT fp.id_campana, MIN(DATE_TRUNC(df.date, MONTH)) AS mes_camp
+    FROM `glamour-peru-dw.glamour_dw.fact_pedidos` fp
+    JOIN `glamour-peru-dw.glamour_dw.dim_fecha`    df USING (id_fecha)
+    GROUP BY 1
+  )
+),
+camp_mes AS (
+  SELECT mes_camp AS mes, COUNT(*) AS n_camp_disp FROM camp GROUP BY 1
+),
+-- primera participación de cada vendedora en cada campaña + campañas saltadas
+vcamp AS (
+  SELECT v.id_vendedor, v.mes_part, c.camp_rank,
+         c.camp_rank - LAG(c.camp_rank) OVER (PARTITION BY v.id_vendedor ORDER BY c.camp_rank) - 1
+                                                          AS saltadas
+  FROM (
+    SELECT fp.id_vendedor, fp.id_campana, MIN(DATE_TRUNC(df.date, MONTH)) AS mes_part
+    FROM `glamour-peru-dw.glamour_dw.fact_pedidos` fp
+    JOIN `glamour-peru-dw.glamour_dw.dim_fecha`    df USING (id_fecha)
+    GROUP BY 1, 2
+  ) v
+  JOIN camp c USING (id_campana)
+),
+vcamp_mes AS (
+  SELECT id_vendedor, mes_part AS mes,
+         COUNT(*) AS n_camp_part,
+         -- saltadas antes de la primera campaña nueva del mes (0 en la 1ra de su vida)
+         ARRAY_AGG(IFNULL(saltadas, 0) ORDER BY camp_rank LIMIT 1)[OFFSET(0)] AS camp_saltadas
+  FROM vcamp
   GROUP BY 1, 2
 ),
 
@@ -91,12 +144,19 @@ panel AS (
     d.id_vendedor, d.mes AS mes_obs, d.mes_rank,
     IFNULL(p.n_ped, 0)                    AS n_ped,
     IFNULL(p.monto, 0)                    AS monto,
+    IFNULL(p.n_ped_directo, 0)            AS n_ped_directo,
+    IFNULL(p.n_ped_nueva, 0)              AS n_ped_nueva,
     IFNULL(pr.n_prod, 0)                  AS n_prod,
     IFNULL(pr.n_cat, 0)                   AS n_cat,
+    IFNULL(vc.n_camp_part, 0)             AS n_camp_part,
+    vc.camp_saltadas,                     -- NULL si no inició campaña nueva ese mes
+    IFNULL(cm.n_camp_disp, 0)             AS n_camp_disp,
     CASE WHEN p.n_ped > 0 THEN 1 ELSE 0 END AS activo
   FROM dense d
-  LEFT JOIN ped  p  USING (id_vendedor, mes)
-  LEFT JOIN prod pr ON pr.id_vendedor = d.id_vendedor AND pr.mes = d.mes
+  LEFT JOIN ped       p  USING (id_vendedor, mes)
+  LEFT JOIN prod      pr ON pr.id_vendedor = d.id_vendedor AND pr.mes = d.mes
+  LEFT JOIN vcamp_mes vc ON vc.id_vendedor = d.id_vendedor AND vc.mes = d.mes
+  LEFT JOIN camp_mes  cm ON cm.mes = d.mes
 ),
 
 -- Features de ventana + etiqueta ---------------------------------------------
@@ -145,7 +205,17 @@ feat AS (
     n_ped - LAG(n_ped, 3)  OVER seq AS d_nped_m3,
     n_ped - LAG(n_ped, 6)  OVER seq AS d_nped_m6,
     n_ped - LAG(n_ped, 9)  OVER seq AS d_nped_m9,
-    n_ped - LAG(n_ped, 12) OVER seq AS d_nped_m12
+    n_ped - LAG(n_ped, 12) OVER seq AS d_nped_m12,
+    -- CAMPAÑAS ----------------------------------------------------------------
+    SUM(n_camp_part) OVER w3   AS camp_part_u3,
+    SUM(n_camp_part) OVER w6   AS camp_part_u6,
+    SUM(n_camp_part) OVER w12  AS camp_part_u12,
+    SUM(n_camp_disp) OVER w3   AS camp_disp_u3,
+    SUM(n_camp_disp) OVER w6   AS camp_disp_u6,
+    SUM(n_camp_disp) OVER w12  AS camp_disp_u12,
+    LAST_VALUE(camp_saltadas IGNORE NULLS) OVER seq AS camp_saltadas_ult,
+    SUM(n_ped_directo) OVER w12 AS n_ped_directo_u12,
+    SUM(n_ped_nueva)   OVER w12 AS n_ped_nueva_u12
   FROM panel p
   WINDOW
     fwd6  AS (PARTITION BY id_vendedor ORDER BY mes_rank ROWS BETWEEN 1 FOLLOWING AND 6 FOLLOWING),
@@ -191,6 +261,14 @@ SELECT
   -- DELTA FEATURES (mt vs mt-n) -----------------------------------------------
   f.d_monto_m1, f.d_monto_m3, f.d_monto_m6, f.d_monto_m9, f.d_monto_m12,
   f.d_nped_m1, f.d_nped_m3, f.d_nped_m6, f.d_nped_m9, f.d_nped_m12,
+  -- CAMPAÑAS ------------------------------------------------------------------
+  IFNULL(f.camp_saltadas_ult, 0)                          AS camp_saltadas,
+  f.camp_part_u12,
+  IFNULL(SAFE_DIVIDE(f.camp_part_u3,  f.camp_disp_u3),  0) AS tasa_camp_u3,
+  IFNULL(SAFE_DIVIDE(f.camp_part_u6,  f.camp_disp_u6),  0) AS tasa_camp_u6,
+  IFNULL(SAFE_DIVIDE(f.camp_part_u12, f.camp_disp_u12), 0) AS tasa_camp_u12,
+  IFNULL(SAFE_DIVIDE(f.n_ped_directo_u12, f.n_ped_u12), 0) AS pct_directo_u12,
+  IF(f.n_ped_nueva_u12 > 0, 1, 0)                          AS es_nueva_u12,
   -- CONTEXTO (master data; snapshot SCD-1) ------------------------------------
   CASE WHEN dv.csexpersona IN ('F', 'M') THEN dv.csexpersona ELSE 'OTRO' END AS sexo,
   CASE WHEN DATE_DIFF(f.mes_obs, dv.fecha_nacimiento, YEAR) BETWEEN 15 AND 95

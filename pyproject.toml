@@ -37,6 +37,9 @@ dependencies = [
     "tabulate>=0.10.0",
     "pypdf",
     "nbconvert",
+    "scikit-survival>=0.27.0",
+    "torch>=2.14.0",
+    "pytrends>=4.9.2",
 ]
 
 [dependency-groups]

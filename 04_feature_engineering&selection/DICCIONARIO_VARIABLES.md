@@ -134,6 +134,30 @@ Antes de codificar (ver §5). En el SQL llegan como texto.
 
 > `edad` y `provincia` se calculan en el SQL pero no se usan en este notebook.
 
+### 3.9 Features nuevas (2026-09): campañas
+
+Motivación: LogReg empata a RF/XGBoost, el tuning y el horizonte `k` no mueven el
+AUC → el cuello de botella es información, no algoritmo. Se probaron cuatro
+familias nuevas (pago, campañas, red y mix de producto) con una ablación por
+grupo (`05_modelling/experimentos/06_features_nuevas.py` →
+`05_modelling/experimentos/reports/features_nuevas_ablation.md`): solo
+**campañas** aportó, así que pago, red y mix se descartaron y ya no están en el
+SQL. Las 7 variables de campañas llegan sin nulos desde el SQL (`IFNULL` a 0),
+no requieren imputación.
+
+**Campañas (frecuencia a granularidad campaña).** Desde 2025 hay 2–3 campañas
+simultáneas por mes, así que `meses_activos_*` subestima el engagement. Cada
+campaña se asigna al mes de su **primer pedido** (evita las fechas invertidas de
+`dim_campana`) y se ordena cronológicamente.
+
+| Variable | Tipo | Descripción |
+|---|---|---|
+| `camp_saltadas` | int | Campañas entre la anterior participación y la más reciente (recencia en campañas). Se arrastra el último valor conocido. |
+| `camp_part_u12` | int | Campañas distintas en las que participó (primera compra en la campaña) en los últimos 12 meses. |
+| `tasa_camp_u3` / `_u6` / `_u12` | float | Campañas participadas / campañas con pedidos (de cualquier vendedora) en la ventana. Puede superar 1 cuando participa en campañas iniciadas antes de la ventana. |
+| `pct_directo_u12` | float | Pedidos de `tipo = 'Directo'` / pedidos totales en 12 meses. |
+| `es_nueva_u12` | 0/1 | Tuvo algún pedido marcado `es_nueva_vendedora` en los últimos 12 meses. |
+
 ---
 
 ## 4 · Features derivadas (creadas en el notebook, §1)

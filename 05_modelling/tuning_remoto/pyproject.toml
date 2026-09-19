@@ -1,0 +1,20 @@
+[project]
+name = "tuning-remoto-churn"
+version = "0.1.0"
+description = "Tuning con Optuna de los modelos de churn (carpeta autocontenida para correr en otra máquina)"
+requires-python = "==3.12.*"
+# Versiones fijadas = las del uv.lock del repo, para que los .joblib carguen de vuelta en la máquina local.
+dependencies = [
+    "numpy==2.4.4",
+    "pandas==2.3.3",
+    "scipy==1.17.1",
+    "scikit-learn==1.8.0",
+    "xgboost==3.2.0",
+    "lightgbm==4.6.0",
+    "catboost==1.2.10",
+    "optuna==4.8.0",
+    "joblib==1.5.3",
+    "tabulate",
+    "jupyterlab",
+    "ipykernel",
+]
