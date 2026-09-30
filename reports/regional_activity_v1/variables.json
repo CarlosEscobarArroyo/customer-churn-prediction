@@ -1,0 +1,67 @@
+{
+  "variants": {
+    "transaccional": [],
+    "mas_departamento": [],
+    "actividad_reciente": [
+      "regional_log_ventas_h0",
+      "regional_log_pedidos_h0",
+      "regional_log_vendedoras_activas_h0",
+      "regional_sin_historia_h0"
+    ],
+    "actividad_6m": [
+      "regional_log_ventas_h0",
+      "regional_log_pedidos_h0",
+      "regional_log_vendedoras_activas_h0",
+      "regional_log_ventas_h6",
+      "regional_log_pedidos_h6",
+      "regional_log_vendedoras_activas_h6",
+      "regional_cambio_ventas_6m",
+      "regional_cambio_pedidos_6m",
+      "regional_cambio_vendedoras_activas_6m",
+      "regional_sin_historia_h0",
+      "regional_sin_historia_h6"
+    ],
+    "actividad_12m": [
+      "regional_log_ventas_h0",
+      "regional_log_pedidos_h0",
+      "regional_log_vendedoras_activas_h0",
+      "regional_log_ventas_h12",
+      "regional_log_pedidos_h12",
+      "regional_log_vendedoras_activas_h12",
+      "regional_cambio_ventas_12m",
+      "regional_cambio_pedidos_12m",
+      "regional_cambio_vendedoras_activas_12m",
+      "regional_sin_historia_h0",
+      "regional_sin_historia_h12"
+    ],
+    "actividad_6m_12m": [
+      "regional_log_ventas_h0",
+      "regional_log_pedidos_h0",
+      "regional_log_vendedoras_activas_h0",
+      "regional_log_ventas_h6",
+      "regional_log_pedidos_h6",
+      "regional_log_vendedoras_activas_h6",
+      "regional_log_ventas_h12",
+      "regional_log_pedidos_h12",
+      "regional_log_vendedoras_activas_h12",
+      "regional_cambio_ventas_6m",
+      "regional_cambio_pedidos_6m",
+      "regional_cambio_vendedoras_activas_6m",
+      "regional_cambio_ventas_12m",
+      "regional_cambio_pedidos_12m",
+      "regional_cambio_vendedoras_activas_12m",
+      "regional_sin_historia_h0",
+      "regional_sin_historia_h6",
+      "regional_sin_historia_h12"
+    ]
+  },
+  "department_control": "cached original one-hot department variant",
+  "levels": "log1p(mean monthly department activity over 3 months, excluding focal seller)",
+  "changes": "(recent - historic)/(recent + historic); both zero -> 0; missing -> missing",
+  "horizons": {
+    "0": "t-3 through t-1",
+    "6": "t-9 through t-7",
+    "12": "t-15 through t-13"
+  },
+  "imputation": "median fitted within each training component; missing window indicators"
+}

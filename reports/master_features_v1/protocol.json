@@ -1,0 +1,91 @@
+{
+  "raw_sha256": "d1529f1f084630f92f60c9feaf3946fe3a7cdc5e162510196e62605029d82999",
+  "code_sha256": "4b2bb05976b9f96dcec03b6a3e551f8464123bd92d7b99589f7a8ed49f47bd6a",
+  "temporal_code_sha256": "f17eea965582a91c54692c13655b8804e3f69bb9b2c2f9d1c2be59acaaf5271e",
+  "ensemble_code_sha256": "7822a641201076c32bb76b8956bcc0289476e5c1ec76d146dcbeb5d8c9679181",
+  "parameter_files": null,
+  "trials": 100,
+  "threads": 4,
+  "pool_rows": 28311,
+  "training_end": "2025-01-01",
+  "gap_months": 6,
+  "base_columns": [
+    "meses_activos_u3",
+    "meses_activos_u6",
+    "meses_activos_u12",
+    "n_ped_u3",
+    "n_ped_u6",
+    "n_ped_u12",
+    "monto_u3",
+    "monto_u6",
+    "monto_u12",
+    "monto_mean_u12",
+    "monto_std_u12",
+    "monto_cv_u12",
+    "monto_ult_vs_media",
+    "meses_desde_compra_previa",
+    "compras_hist",
+    "n_prod_u12",
+    "n_cat_max_u12",
+    "tend_monto_u3_vs_prev3",
+    "tend_nped_u3_vs_prev3",
+    "monto_acum",
+    "n_ped_acum",
+    "n_prod_acum",
+    "n_cat_max_acum",
+    "ticket_acum",
+    "monto_por_prod_acum",
+    "monto_mensual_acum",
+    "d_monto_m1",
+    "d_monto_m3",
+    "d_monto_m6",
+    "d_monto_m9",
+    "d_monto_m12",
+    "d_nped_m1",
+    "d_nped_m3",
+    "d_nped_m6",
+    "d_nped_m9",
+    "d_nped_m12"
+  ],
+  "variants": {
+    "transaccional": [],
+    "mas_sexo": [
+      "sexo"
+    ],
+    "mas_edad": [
+      "edad"
+    ],
+    "mas_antiguedad": [
+      "antiguedad_meses"
+    ],
+    "mas_departamento": [
+      "departamento"
+    ],
+    "mas_provincia": [
+      "provincia"
+    ],
+    "mas_ubicacion": [
+      "departamento",
+      "provincia"
+    ],
+    "mas_demografia_antiguedad": [
+      "sexo",
+      "edad",
+      "antiguedad_meses"
+    ],
+    "mas_todas": [
+      "sexo",
+      "edad",
+      "antiguedad_meses",
+      "departamento",
+      "provincia"
+    ]
+  },
+  "versions": {
+    "numpy": "2.4.4",
+    "pandas": "2.3.3",
+    "scikit-learn": "1.8.0",
+    "xgboost": "3.2.0",
+    "optuna": "4.8.0"
+  }
+}

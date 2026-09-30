@@ -1,0 +1,53 @@
+{
+  "lag_months": 3,
+  "variants": {
+    "transaccional": [],
+    "mas_inflacion": [
+      "inflacion_nacional_var12_pct"
+    ],
+    "mas_comercio": [
+      "comercio_var12_pct"
+    ],
+    "mas_expectativas_demanda": [
+      "expect_demanda_3m_indice"
+    ],
+    "mas_credito_regional": [
+      "credito_regional_var12_pct"
+    ],
+    "cuatro_fuentes": [
+      "inflacion_nacional_var12_pct",
+      "comercio_var12_pct",
+      "expect_demanda_3m_indice",
+      "credito_regional_var12_pct"
+    ],
+    "todos_externos": [
+      "ipc_nacional_base_dic2021_100",
+      "inflacion_nacional_mensual_pct",
+      "inflacion_nacional_var12_pct",
+      "comercio_var12_pct",
+      "pbi_var12_pct",
+      "expect_economia_3m_indice",
+      "expect_demanda_3m_indice",
+      "empleo_formal_var12_pct",
+      "ingreso_formal_nominal_var12_pct",
+      "tipo_cambio_soles_usd",
+      "credito_consumo_var12_pct",
+      "credito_regional_var12_pct"
+    ]
+  },
+  "regional_formula": "100 * (credit_at_ref_month / credit_same_department_12_months_earlier - 1)",
+  "macro_columns": [
+    "ipc_nacional_base_dic2021_100",
+    "inflacion_nacional_mensual_pct",
+    "inflacion_nacional_var12_pct",
+    "comercio_var12_pct",
+    "pbi_var12_pct",
+    "expect_economia_3m_indice",
+    "expect_demanda_3m_indice",
+    "empleo_formal_var12_pct",
+    "ingreso_formal_nominal_var12_pct",
+    "tipo_cambio_soles_usd",
+    "credito_consumo_var12_pct"
+  ],
+  "raw_credit_balance_used_as_predictor": false
+}

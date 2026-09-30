@@ -1,0 +1,100 @@
+{
+  "code_sha256": "3e0c4b0423e9ec6f68fe803798c7b570f8a07b5e103ccf82e9277652bd1f0481",
+  "raw_sha256": "d1529f1f084630f92f60c9feaf3946fe3a7cdc5e162510196e62605029d82999",
+  "sources": {
+    "data/processed/panel_denso_mensual.csv": "815910e7a478e408d1b6d3f569a61cbdd39d62f7a0b3aaf873d031ad8a38207a",
+    "data/processed/dim_vendedor.csv": "0a6602b74127c967011256b29f15fcf681ef5b4585a358261f296205b57873ea"
+  },
+  "dependencies": {
+    "scripts/master_features_ablation.py": "c5288685c46f48ec11b9b9c5ef02c7fb532ab222f426a507fbde57974f91e72b",
+    "scripts/temporal_optuna.py": "f17eea965582a91c54692c13655b8804e3f69bb9b2c2f9d1c2be59acaaf5271e",
+    "scripts/recent_windows.py": "7822a641201076c32bb76b8956bcc0289476e5c1ec76d146dcbeb5d8c9679181",
+    "scripts/external_features_ablation.py": "7cad3b5d568cc06e56a1a96f4d2091961e9879e1e12d09b8d13876bbb556f2a7",
+    "scripts/climate_trends_ablation.py": "83dbdc1d6d183460ef2ca98e47a5df8a32d78ea196f9e00f18983c49d3e7f482"
+  },
+  "parameters": {
+    "logreg": "37bcca7f2d5b160626077629ff0c6b8562b2fda7e8372b6a89dd2e3cd7615c2d",
+    "xgboost": "0871108a89c541c4dcc86539ebf75a561f8231ae21463733e391a4a786259062"
+  },
+  "versions": {
+    "numpy": "2.4.4",
+    "pandas": "2.3.3",
+    "scikit-learn": "1.8.0",
+    "xgboost": "3.2.0",
+    "optuna": "4.8.0"
+  },
+  "threads": 4,
+  "training_end": "2025-01-01",
+  "gap_months": 6,
+  "variants": {
+    "transaccional": [],
+    "mas_departamento": [],
+    "actividad_reciente": [
+      "regional_log_ventas_h0",
+      "regional_log_pedidos_h0",
+      "regional_log_vendedoras_activas_h0",
+      "regional_sin_historia_h0"
+    ],
+    "actividad_6m": [
+      "regional_log_ventas_h0",
+      "regional_log_pedidos_h0",
+      "regional_log_vendedoras_activas_h0",
+      "regional_log_ventas_h6",
+      "regional_log_pedidos_h6",
+      "regional_log_vendedoras_activas_h6",
+      "regional_cambio_ventas_6m",
+      "regional_cambio_pedidos_6m",
+      "regional_cambio_vendedoras_activas_6m",
+      "regional_sin_historia_h0",
+      "regional_sin_historia_h6"
+    ],
+    "actividad_12m": [
+      "regional_log_ventas_h0",
+      "regional_log_pedidos_h0",
+      "regional_log_vendedoras_activas_h0",
+      "regional_log_ventas_h12",
+      "regional_log_pedidos_h12",
+      "regional_log_vendedoras_activas_h12",
+      "regional_cambio_ventas_12m",
+      "regional_cambio_pedidos_12m",
+      "regional_cambio_vendedoras_activas_12m",
+      "regional_sin_historia_h0",
+      "regional_sin_historia_h12"
+    ],
+    "actividad_6m_12m": [
+      "regional_log_ventas_h0",
+      "regional_log_pedidos_h0",
+      "regional_log_vendedoras_activas_h0",
+      "regional_log_ventas_h6",
+      "regional_log_pedidos_h6",
+      "regional_log_vendedoras_activas_h6",
+      "regional_log_ventas_h12",
+      "regional_log_pedidos_h12",
+      "regional_log_vendedoras_activas_h12",
+      "regional_cambio_ventas_6m",
+      "regional_cambio_pedidos_6m",
+      "regional_cambio_vendedoras_activas_6m",
+      "regional_cambio_ventas_12m",
+      "regional_cambio_pedidos_12m",
+      "regional_cambio_vendedoras_activas_12m",
+      "regional_sin_historia_h0",
+      "regional_sin_historia_h6",
+      "regional_sin_historia_h12"
+    ]
+  },
+  "cached_references": {
+    "transaccional/0": "2648e5f6b95c8a39bd8fa7e645cb797256311914e99ed72bdb46a9fe99fd0dcc",
+    "transaccional/1": "ee9c178a934c30cec87c2bd3b3963e3b3ec1c831345a5089e85f89cf0df1c649",
+    "transaccional/2": "745efd00f1704282ca865866c25b95fa3b77dd96238dfaac77d6211f29754641",
+    "transaccional/3": "882a117d2db14b012a44952e01224d41ca94b8383e9726317c01c2f80fd6aae5",
+    "mas_departamento/0": "50a56ee71f03b44731133a108de4d5510c25f0b3c857e4ec83ebaa548babee75",
+    "mas_departamento/1": "0639ed2019130cd45b74c5079116e1efec42d199dd47f5c5b9a42bfbf6148777",
+    "mas_departamento/2": "25a0d90dc130c3b7543c0752e9ea145246d009ea66ce4f09c0eeb2f9a62897d7",
+    "mas_departamento/3": "48462e5c9ae71f3d5ec8f13b420026045b89d8b4f6b2307541abd9723ae46509"
+  },
+  "window": "mean of 3 complete months; endpoints t-1, t-7, t-13",
+  "leave_one_seller_out": true,
+  "labels_used_in_features": false,
+  "location_caveat": "current department snapshot, historical moves unavailable",
+  "status": "development temporal validation reused for selection; not final independent OOT"
+}

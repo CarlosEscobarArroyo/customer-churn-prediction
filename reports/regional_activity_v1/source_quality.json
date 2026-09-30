@@ -1,0 +1,10 @@
+{
+  "source_rows_through_reference": 738657,
+  "source_sellers": 11358,
+  "source_first_month": "2016-11-01",
+  "source_last_month": "2024-12-01",
+  "rows_without_department": 5795,
+  "active_seller_months_without_department": 140,
+  "sales_without_department": 50799.81,
+  "total_sales": 18766934.03
+}

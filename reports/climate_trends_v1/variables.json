@@ -1,0 +1,209 @@
+{
+  "variants": {
+    "transaccional": [],
+    "mas_nasa": [
+      "nasa_temperatura_media_c",
+      "nasa_temperatura_maxima_media_c",
+      "nasa_temperatura_minima_media_c",
+      "nasa_temperatura_maxima_c",
+      "nasa_temperatura_minima_c",
+      "nasa_humedad_relativa_pct",
+      "nasa_precipitacion_total_mm",
+      "nasa_precipitacion_maxima_diaria_mm",
+      "nasa_dias_lluvia_ge1mm",
+      "nasa_viento_m_s",
+      "nasa_temperatura_delta12_c",
+      "nasa_precipitacion_delta12_mm",
+      "nasa_sin_dato"
+    ],
+    "mas_trends_catalogo": [
+      "trends_venta_por_catalogo_zexp",
+      "trends_catalogo_zexp",
+      "trends_catalogo_de_ropa_zexp",
+      "trends_vender_por_catalogo_zexp",
+      "trends_glamour_zexp"
+    ],
+    "mas_trends": [
+      "trends_venta_por_catalogo_zexp",
+      "trends_catalogo_zexp",
+      "trends_catalogo_de_ropa_zexp",
+      "trends_vender_por_catalogo_zexp",
+      "trends_glamour_zexp",
+      "trends_yanbal_zexp",
+      "trends_natura_zexp",
+      "trends_unique_zexp",
+      "trends_esika_zexp",
+      "trends_belcorp_zexp",
+      "trends_shein_zexp",
+      "trends_temu_zexp",
+      "trends_gamarra_zexp",
+      "trends_ropa_por_mayor_zexp",
+      "trends_trabajo_desde_casa_zexp",
+      "trends_trabajo_zexp",
+      "trends_prestamo_zexp",
+      "trends_ofertas_zexp",
+      "trends_ropa_zexp",
+      "trends_cts_zexp"
+    ],
+    "mas_trends_indices": [
+      "trends_venta_por_catalogo_indice",
+      "trends_catalogo_indice",
+      "trends_catalogo_de_ropa_indice",
+      "trends_vender_por_catalogo_indice",
+      "trends_glamour_indice",
+      "trends_yanbal_indice",
+      "trends_natura_indice",
+      "trends_unique_indice",
+      "trends_esika_indice",
+      "trends_belcorp_indice",
+      "trends_shein_indice",
+      "trends_temu_indice",
+      "trends_gamarra_indice",
+      "trends_ropa_por_mayor_indice",
+      "trends_trabajo_desde_casa_indice",
+      "trends_trabajo_indice",
+      "trends_prestamo_indice",
+      "trends_ofertas_indice",
+      "trends_ropa_indice",
+      "trends_cts_indice"
+    ],
+    "mas_nasa_trends": [
+      "nasa_temperatura_media_c",
+      "nasa_temperatura_maxima_media_c",
+      "nasa_temperatura_minima_media_c",
+      "nasa_temperatura_maxima_c",
+      "nasa_temperatura_minima_c",
+      "nasa_humedad_relativa_pct",
+      "nasa_precipitacion_total_mm",
+      "nasa_precipitacion_maxima_diaria_mm",
+      "nasa_dias_lluvia_ge1mm",
+      "nasa_viento_m_s",
+      "nasa_temperatura_delta12_c",
+      "nasa_precipitacion_delta12_mm",
+      "nasa_sin_dato",
+      "trends_venta_por_catalogo_zexp",
+      "trends_catalogo_zexp",
+      "trends_catalogo_de_ropa_zexp",
+      "trends_vender_por_catalogo_zexp",
+      "trends_glamour_zexp",
+      "trends_yanbal_zexp",
+      "trends_natura_zexp",
+      "trends_unique_zexp",
+      "trends_esika_zexp",
+      "trends_belcorp_zexp",
+      "trends_shein_zexp",
+      "trends_temu_zexp",
+      "trends_gamarra_zexp",
+      "trends_ropa_por_mayor_zexp",
+      "trends_trabajo_desde_casa_zexp",
+      "trends_trabajo_zexp",
+      "trends_prestamo_zexp",
+      "trends_ofertas_zexp",
+      "trends_ropa_zexp",
+      "trends_cts_zexp"
+    ]
+  },
+  "terms": [
+    "venta por catalogo",
+    "catalogo",
+    "catalogo de ropa",
+    "vender por catalogo",
+    "glamour",
+    "yanbal",
+    "natura",
+    "unique",
+    "esika",
+    "belcorp",
+    "shein",
+    "temu",
+    "gamarra",
+    "ropa por mayor",
+    "trabajo desde casa",
+    "trabajo",
+    "prestamo",
+    "ofertas",
+    "ropa",
+    "cts"
+  ],
+  "nasa_definitions": {
+    "daily": {
+      "T2M": [
+        "temperatura_media_c",
+        "C"
+      ],
+      "T2M_MAX": [
+        "temperatura_maxima_c",
+        "C"
+      ],
+      "T2M_MIN": [
+        "temperatura_minima_c",
+        "C"
+      ],
+      "RH2M": [
+        "humedad_relativa_pct",
+        "%"
+      ],
+      "PRECTOTCORR": [
+        "precipitacion_mm",
+        "mm/day"
+      ],
+      "WS2M": [
+        "viento_m_s",
+        "m/s"
+      ]
+    },
+    "monthly": {
+      "temperatura_media_c": [
+        "temperatura_media_c",
+        "mean"
+      ],
+      "temperatura_maxima_media_c": [
+        "temperatura_maxima_c",
+        "mean"
+      ],
+      "temperatura_minima_media_c": [
+        "temperatura_minima_c",
+        "mean"
+      ],
+      "temperatura_maxima_c": [
+        "temperatura_maxima_c",
+        "max"
+      ],
+      "temperatura_minima_c": [
+        "temperatura_minima_c",
+        "min"
+      ],
+      "humedad_relativa_pct": [
+        "humedad_relativa_pct",
+        "mean"
+      ],
+      "precipitacion_total_mm": [
+        "precipitacion_mm",
+        "sum"
+      ],
+      "precipitacion_maxima_diaria_mm": [
+        "precipitacion_mm",
+        "max"
+      ],
+      "dias_lluvia_ge1mm": [
+        "precipitacion_mm",
+        "rain_days"
+      ],
+      "viento_m_s": [
+        "viento_m_s",
+        "mean"
+      ]
+    },
+    "derived": {
+      "nasa_temperatura_delta12_c": "reference month minus exact same month one year earlier",
+      "nasa_precipitacion_delta12_mm": "reference month minus exact same month one year earlier",
+      "nasa_sin_dato": "1 if any of the ten monthly climate features is missing"
+    },
+    "rain_days_threshold_mm": 1,
+    "monthly_missing_policy": "null if any required day is missing",
+    "lag_months_assumed": 3,
+    "time_standard": "LST, not civil Peru time"
+  },
+  "zexp": "(x_ref - mean(x_2016_01..ref)) / sample_std(x_2016_01..ref), minimum 12 months; zero std -> missing",
+  "imputation": "median fitted only on each component training set; empty features retained"
+}

@@ -1,0 +1,60 @@
+{
+  "workbook_sha256": "856a7a04b4f5845186edbdb4a48669d267bbe307a3218a698082d0f52563e4bc",
+  "raw_sha256": "d1529f1f084630f92f60c9feaf3946fe3a7cdc5e162510196e62605029d82999",
+  "code_sha256": "7cad3b5d568cc06e56a1a96f4d2091961e9879e1e12d09b8d13876bbb556f2a7",
+  "parameters": {
+    "logreg": "37bcca7f2d5b160626077629ff0c6b8562b2fda7e8372b6a89dd2e3cd7615c2d",
+    "xgboost": "0871108a89c541c4dcc86539ebf75a561f8231ae21463733e391a4a786259062"
+  },
+  "dependencies": {
+    "scripts/temporal_optuna.py": "f17eea965582a91c54692c13655b8804e3f69bb9b2c2f9d1c2be59acaaf5271e",
+    "scripts/master_features_ablation.py": "c5288685c46f48ec11b9b9c5ef02c7fb532ab222f426a507fbde57974f91e72b",
+    "scripts/recent_windows.py": "7822a641201076c32bb76b8956bcc0289476e5c1ec76d146dcbeb5d8c9679181"
+  },
+  "lag_months_assumed": 3,
+  "threads": 4,
+  "versions": {
+    "numpy": "2.4.4",
+    "pandas": "2.3.3",
+    "scikit-learn": "1.8.0",
+    "xgboost": "3.2.0",
+    "optuna": "4.8.0"
+  },
+  "training_end": "2025-01-01",
+  "variants": {
+    "transaccional": [],
+    "mas_inflacion": [
+      "inflacion_nacional_var12_pct"
+    ],
+    "mas_comercio": [
+      "comercio_var12_pct"
+    ],
+    "mas_expectativas_demanda": [
+      "expect_demanda_3m_indice"
+    ],
+    "mas_credito_regional": [
+      "credito_regional_var12_pct"
+    ],
+    "cuatro_fuentes": [
+      "inflacion_nacional_var12_pct",
+      "comercio_var12_pct",
+      "expect_demanda_3m_indice",
+      "credito_regional_var12_pct"
+    ],
+    "todos_externos": [
+      "ipc_nacional_base_dic2021_100",
+      "inflacion_nacional_mensual_pct",
+      "inflacion_nacional_var12_pct",
+      "comercio_var12_pct",
+      "pbi_var12_pct",
+      "expect_economia_3m_indice",
+      "expect_demanda_3m_indice",
+      "empleo_formal_var12_pct",
+      "ingreso_formal_nominal_var12_pct",
+      "tipo_cambio_soles_usd",
+      "credito_consumo_var12_pct",
+      "credito_regional_var12_pct"
+    ]
+  },
+  "status": "exploratory revised snapshot; historical publication dates/vintages unavailable"
+}

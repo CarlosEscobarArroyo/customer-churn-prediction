@@ -1,0 +1,42 @@
+{
+  "kind": "supplied",
+  "path": "/Users/carlosescobar/Projects/Glamour/customer-churn-prediction/reports/master_features_v1/reconstructed_tuning",
+  "search_history": {
+    "logreg": {
+      "states": {
+        "COMPLETE": 77,
+        "PRUNED": 23
+      },
+      "stop_reason": "budget_completed"
+    },
+    "xgboost": {
+      "states": {
+        "COMPLETE": 45,
+        "PRUNED": 40,
+        "FAIL": 1
+      },
+      "stop_reason": "stopped_to_prioritize_variable_comparison; FAIL is intentional interruption"
+    }
+  },
+  "parameters": {
+    "logreg": {
+      "features": "all",
+      "balance": true,
+      "C": 1.224031190654576,
+      "l1_ratio": 0.5886282980407573
+    },
+    "xgboost": {
+      "features": "all",
+      "balance": true,
+      "n_estimators": 1000,
+      "max_depth": 3,
+      "learning_rate": 0.006248750000354378,
+      "min_child_weight": 74.68883320218082,
+      "subsample": 0.7971824624514072,
+      "colsample_bytree": 0.9158851867786222,
+      "reg_alpha": 3.3084222327042743,
+      "reg_lambda": 13.982858722572843,
+      "gamma": 2.486928339470145
+    }
+  }
+}

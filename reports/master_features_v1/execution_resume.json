@@ -1,0 +1,7 @@
+{
+  "source": "reports/master_features_v1_serial_checkpoint",
+  "preserved_completed_trials": 16,
+  "interrupted_trial": 16,
+  "action": "retry trial 16 with same sampler seed; parallel independent logistic folds",
+  "verification": "Real trial 12 reproduced exact objective and all diagnostics in 12.64s vs 34.4s sequential"
+}
