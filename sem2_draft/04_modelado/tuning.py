@@ -6,25 +6,17 @@ forma parte del espacio de búsqueda (§4.1 / §4.3).
 
 Cada estudio se persiste en `optuna.db` (SQLite, no versionado), de modo que una corrida
 interrumpida se reanuda sin repetir trials. `tune()` devuelve el mejor conjunto de
-hiperparámetros; `build()` construye el estimador a partir de ese dict.
+hiperparámetros; `src.modelos.build()` construye el estimador a partir de ese dict.
 """
 
 from pathlib import Path
 
 import numpy as np
 import optuna
-from catboost import CatBoostClassifier
-from lightgbm import LGBMClassifier
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler
-from xgboost import XGBClassifier
 
 from src import evaluacion
+from src.modelos import SEED, N_JOBS, build  # noqa: F401  (build se reexporta para el notebook)
 
-SEED = 42
-N_JOBS = 16
 ALGOS = ["logreg", "rf", "xgboost", "lightgbm", "catboost"]
 DB = Path(__file__).parent / "optuna.db"
 
@@ -74,30 +66,6 @@ def espacio(algo, trial, ratio, con_peso=True):
     else:
         raise ValueError(algo)
     return p
-
-
-def build(algo, p):
-    """Estimador sklearn-compatible a partir de un dict de `espacio` (incluye `w`)."""
-    p = dict(p)
-    w = p.pop("w", 1.0)
-    if algo == "logreg":
-        return Pipeline([("sc", StandardScaler()),
-                         ("lr", LogisticRegression(solver="liblinear", max_iter=2000,
-                                                   class_weight={0: 1.0, 1: w},
-                                                   random_state=SEED, **p))])
-    if algo == "rf":
-        return RandomForestClassifier(class_weight={0: 1.0, 1: w}, n_jobs=N_JOBS,
-                                      random_state=SEED, **p)
-    if algo == "xgboost":
-        return XGBClassifier(scale_pos_weight=w, tree_method="hist", n_jobs=N_JOBS,
-                             random_state=SEED, verbosity=0, **p)
-    if algo == "lightgbm":
-        return LGBMClassifier(scale_pos_weight=w, subsample_freq=1, n_jobs=N_JOBS,
-                              random_state=SEED, verbose=-1, **p)
-    if algo == "catboost":
-        return CatBoostClassifier(scale_pos_weight=w, thread_count=N_JOBS,
-                                  random_seed=SEED, verbose=0, allow_writing_files=False, **p)
-    raise ValueError(algo)
 
 
 def make_model_factory(algo, p, sampler=None):

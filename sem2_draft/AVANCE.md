@@ -16,8 +16,8 @@ Los números salen de los reportes generados (`reports/*.md`, `02_particion/part
 | 4.3 | OOT 4 meses + brecha 6 m + 4 bloques de validación expansiva | ✅ | `02_particion/` |
 | 4.3 | LogReg, RF, XGBoost, LightGBM, CatBoost con Optuna, mismo presupuesto | ✅ | `04_modelado/` |
 | 4.3 | Ventanas de entrenamiento y ensembles | ✅ | `04_modelado/` |
-| 4.3 | GroupKFold como verificación complementaria | ⏳ | `05_evaluacion/` |
-| 4.3 | OOT una sola vez: AUC, PR-AUC, ROC, matriz, precisión/recall/lift por % contactado | ⏳ | `05_evaluacion/` |
+| 4.3 | GroupKFold como verificación complementaria | ✅ | `05_evaluacion/` |
+| 4.3 | OOT una sola vez: AUC, PR-AUC, ROC, matriz, precisión/recall/lift por % contactado | ✅ | `05_evaluacion/` |
 | 4.4 | SHAP global, dependencia, casos locales del decil superior | ⏳ | `06_interpretacion/` |
 | — | EDA (no está en la metodología; se agregó a pedido) | ✅ | `01_eda/` |
 
@@ -143,6 +143,52 @@ Lecturas:
 
 Detalle: `reports/modelado.md`.
 
+## 05_evaluacion (§4.3 GroupKFold + OOT)
+
+Configuración fija desde `modelo_final.json`; aquí no se decide nada. Corrida del 2026-10-01.
+
+**Verificación complementaria** (pool de desarrollo, 5 folds, ensemble completo re-entrenado por fold):
+
+| validación | AUC | std | lift decil |
+|---|---:|---:|---:|
+| temporal 4 bloques (selección, `04`) | 0.7912 | 0.009 | 2.34 |
+| GroupKFold(5) por `id_vendedor` | 0.7342 | 0.004 | 2.08 |
+| StratifiedKFold(5) sin grupos | 0.7340 | 0.007 | 2.08 |
+
+GroupKFold − StratifiedKFold = +0.0002: separar vendedoras no cambia nada, el modelo no memoriza
+individuos. El nivel más bajo (0.73) no es comparable con el temporal: el K-fold aleatorio valida sobre
+toda la historia (2016–2025), incluidos los años 2018–2020 de prevalencia 0.35–0.37 y dinámica distinta;
+sirve para la comparación con/sin grupos, no como estimación de despliegue.
+
+**Test OOT, una sola evaluación** (dic-2025 → mar-2026, 879 filas, prevalencia 0.276; entrenamiento con
+todo el pool hasta may-2025):
+
+| métrica | OOT |
+|---|---:|
+| AUC-ROC | **0.7926** |
+| PR-AUC | 0.568 |
+| Lift decil superior (media mensual) | 2.27 |
+| AUC por mes | 0.790 / 0.782 / 0.791 / 0.814 |
+| AUC por miembro (lightgbm / xgboost / catboost) | 0.793 / 0.794 / 0.790 |
+
+Por % de base contactada: top-5 % precisión 0.66, recall 0.12, lift 2.38; top-10 % 0.63 / 0.23 / 2.26;
+top-20 % 0.59 / 0.43 / 2.14; top-30 % 0.55 / 0.59 / 1.97. Matriz a p ≥ 0.5: TP 130, FP 98, FN 113,
+TN 538 (precisión 0.57, recall 0.54, 26 % contactados).
+
+Lecturas:
+
+- El AUC OOT (0.7926) queda al nivel del AUC de selección (0.7912): en este período no se observa el
+  sesgo optimista que esperábamos. Los 4 meses del OOT son homogéneos (0.78–0.81).
+- `sem1` reportó 0.7636 en su OOT (oct-2025 → ene-2026, 885 filas). No es el mismo período ni el mismo
+  corte del warehouse (`sem2` descarta el mes parcial, ver `00_datos`), así que no es una comparación
+  directa; sí indica que el período de prueba pesa más que el modelo.
+- Los tres miembros rinden igual en el OOT (0.790–0.794) y el ensemble no los supera: confirma que la
+  ganancia del ensemble está dentro del ruido, como ya se leía en `04`.
+- Modelo guardado en `models/ensemble_final.joblib` (no versionado); métricas en
+  `05_evaluacion/oot_metricas.json`.
+
+Detalle: `reports/evaluacion.md`.
+
 ## Infraestructura
 
 - `src/datos.py`: carga, preprocess (imputación + 6 derivadas), cliente BigQuery con cuenta gmail.
@@ -150,13 +196,15 @@ Detalle: `reports/modelado.md`.
 - `src/evaluacion.py`: `evaluar(make_model, df, feats, folds, ventana_meses)` → AUC por bloque,
   media, std, lift top-10 % mensual, predicciones OOF; `metricas_oof(df, oof, folds)` para ensembles
   por promedio de OOF. Reutilizable en `05`.
-- `04_modelado/tuning.py`: espacios de búsqueda, `build(algo, params)`, `tune(...)` con SQLite.
+- `src/modelos.py`: `build(algo, params)` para los 5 algoritmos; `EnsemblePromedio` (ventana por
+  miembro, `proba_miembros`) y `desde_spec(modelo_final.json)`. Lo usan `04`, `05` y `06`.
+- `04_modelado/tuning.py`: espacios de búsqueda y `tune(...)` con SQLite.
 - Notebooks escritos directo (sin builders); el kernel corre desde la carpeta del notebook.
-- `data/`, `optuna.db` y `trials/` no se versionan.
+- `data/`, `models/`, `optuna.db` y `trials/` no se versionan.
 
 ## Próximo paso
 
-`05_evaluacion`: (a) verificación complementaria con GroupKFold por `id_vendedor` con la configuración
-final fija; (b) entrenar los 3 miembros con todo el pool de desarrollo (`modelo_final.json`) y evaluar el
-OOT **una sola vez**: AUC, PR-AUC, curva ROC, matriz de confusión, precisión/recall/lift por % contactado.
-Guardar los modelos en `models/` (no versionado).
+`06_interpretacion` (§4.4): TreeSHAP sobre cada miembro del ensemble (`models/ensemble_final.joblib`) y
+promedio de los valores SHAP; ranking global por |SHAP| medio y gráfico de resumen; contraste con la
+importancia por permutación de `03`; gráficos de dependencia de las variables más influyentes; casos
+locales de vendedoras del decil superior del OOT (sin mostrar `id_vendedor`).
