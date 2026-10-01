@@ -97,3 +97,6 @@ Thumbs.db
 logs/
 .cache/
 tmp/
+
+# Estudios de Optuna (SQLite, reproducibles desde el notebook)
+*.db

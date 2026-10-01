@@ -24,6 +24,23 @@ def lift_decil_mensual(mes, y, score, frac=0.10):
     return float(np.mean(lifts))
 
 
+def metricas_oof(df, oof, folds):
+    """Métricas de un vector de predicciones OOF (NaN fuera de los bloques de validación).
+
+    Sirve para evaluar un modelo (`evaluar`) o un ensemble por promedio de OOF: como cada
+    bloque se predice con modelos entrenados solo con su historia previa, promediar OOF
+    equivale a entrenar el ensemble bloque a bloque.
+    """
+    aucs = [roc_auc_score(df.churn.iloc[va], oof[va]) for _, va in folds]
+    val = ~np.isnan(oof)
+    return {
+        "aucs": [round(a, 4) for a in aucs],
+        "auc": float(np.mean(aucs)), "std": float(np.std(aucs)),
+        "lift10": lift_decil_mensual(df.mes_obs[val], df.churn[val], oof[val]),
+        "oof": oof,
+    }
+
+
 def evaluar(make_model, df, feats, folds=None, ventana_meses=None):
     """Evalúa `make_model(y_train) -> estimador` sobre los bloques de `df` (pool de desarrollo).
 
@@ -32,7 +49,6 @@ def evaluar(make_model, df, feats, folds=None, ventana_meses=None):
     """
     folds = folds or particion.temporal_folds(df.mes_rank)
     oof = np.full(len(df), np.nan)
-    aucs = []
     for tr, va in folds:
         if ventana_meses:
             lim = df.mes_rank.iloc[tr].max() - ventana_meses
@@ -40,14 +56,7 @@ def evaluar(make_model, df, feats, folds=None, ventana_meses=None):
         y_tr = df.churn.iloc[tr].to_numpy()
         m = make_model(y_tr).fit(df[feats].iloc[tr], y_tr)
         oof[va] = m.predict_proba(df[feats].iloc[va])[:, 1]
-        aucs.append(roc_auc_score(df.churn.iloc[va], oof[va]))
-    val = ~np.isnan(oof)
-    return {
-        "aucs": [round(a, 4) for a in aucs],
-        "auc": float(np.mean(aucs)), "std": float(np.std(aucs)),
-        "lift10": lift_decil_mensual(df.mes_obs[val], df.churn[val], oof[val]),
-        "oof": oof,
-    }
+    return metricas_oof(df, oof, folds)
 
 
 def scale_pos_weight(y):

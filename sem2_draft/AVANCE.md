@@ -10,12 +10,12 @@ Los números salen de los reportes generados (`reports/*.md`, `02_particion/part
 |---|---|---|---|
 | 4.1 | Re-extraer del DW; misma definición de churn, población y multi-slice mensual | ✅ | `00_datos/` |
 | 4.1 | Imputación a cero; estandarización solo para logística, ajustada en train | ✅ | `src/datos.py`; `StandardScaler` dentro del pipeline |
-| 4.1 | Desbalance: pesos de clase vs sin ponderar vs submuestreo vs SMOTE | ⏳ | `04_modelado/` |
+| 4.1 | Desbalance: pesos de clase vs sin ponderar vs submuestreo vs SMOTE | ✅ | `04_modelado/` |
 | 4.2 | Solo transaccional LRFM + acumuladas + cambio; sin datos maestros | ✅ | `00_datos/qry_churn.sql` |
 | 4.2 | Permutación + ablación forward | ✅ | `03_variables/` |
 | 4.3 | OOT 4 meses + brecha 6 m + 4 bloques de validación expansiva | ✅ | `02_particion/` |
-| 4.3 | LogReg, RF, XGBoost, LightGBM, CatBoost con Optuna, mismo presupuesto | ⏳ | `04_modelado/` |
-| 4.3 | Ventanas de entrenamiento y ensembles | ⏳ | `04_modelado/` |
+| 4.3 | LogReg, RF, XGBoost, LightGBM, CatBoost con Optuna, mismo presupuesto | ✅ | `04_modelado/` |
+| 4.3 | Ventanas de entrenamiento y ensembles | ✅ | `04_modelado/` |
 | 4.3 | GroupKFold como verificación complementaria | ⏳ | `05_evaluacion/` |
 | 4.3 | OOT una sola vez: AUC, PR-AUC, ROC, matriz, precisión/recall/lift por % contactado | ⏳ | `05_evaluacion/` |
 | 4.4 | SHAP global, dependencia, casos locales del decil superior | ⏳ | `06_interpretacion/` |
@@ -95,16 +95,68 @@ criterio del §4.3 (AUC medio; desempate por Top Decile Lift; a igualdad, el má
 
 Detalle: `reports/variables.md`.
 
+## 04_modelado (§4.1 desbalance + §4.3 búsqueda, ventanas, ensembles)
+
+Secuencia **greedy**: cada decisión se toma con los 4 bloques y queda fija antes de la siguiente. Criterio
+en todas: AUC medio; empate (≤ 0.001) → lift top-10 % mensual; empate (≤ 0.02) → el más simple (menos
+miembros, luego menos variables). Corrida del 2026-10-01, 33 min de búsqueda (24 hilos).
+
+1. **Desbalance** (XGBoost de referencia, 6 variables): pesos de clase 0.7884 / lift 2.35; sin ponderar
+   0.7879 / 2.27; submuestreo 0.7871 / 2.20; SMOTE 0.7791 / 2.23. **Gana pesos de clase**; en Optuna el
+   peso de la clase positiva se tunea en [1, ratio], así cubre el continuo entre "sin ponderar" y "balanceado".
+2. **Optuna**: 5 algoritmos × {6, 42} variables, **100 trials** por estudio (TPE, semilla 42), objetivo
+   AUC medio de los 4 bloques. Estudios persistidos en `04_modelado/optuna.db` (reanudable);
+   trials en `04_modelado/trials/*.csv` (no versionados).
+
+   | algoritmo | AUC 6 vars | AUC 42 vars | elegido | ventana elegida | AUC final | lift |
+   |---|---:|---:|---|---|---:|---:|
+   | LightGBM | **0.7911** | 0.7862 | 6 | todo | 0.7911 | 2.31 |
+   | XGBoost | **0.7910** | 0.7858 | 6 | todo | 0.7910 | 2.28 |
+   | CatBoost | **0.7904** | 0.7859 | 6 | todo | 0.7904 | 2.28 |
+   | RF | **0.7898** | 0.7869 | 6 | todo | 0.7898 | 2.29 |
+   | LogReg | 0.7811 | **0.7845** | 42 | 36 m | 0.7871 | 2.24 |
+
+3. **Conjunto**: 6 variables gana en los cuatro modelos de árboles (+0.003 a +0.005); la logística prefiere
+   las 42 (+0.003), igual que en `03`.
+4. **Ventanas** (hiperparámetros fijos): en árboles, toda la historia ≥ 48 m ≥ 36 m > 24 m, con diferencias
+   ≤ 0.003; la logística mejora recortando a 36 m (0.7871 vs 0.7845 con todo).
+5. **Ensembles** (promedio de probabilidades OOF, miembros en orden de AUC): los cinco juntos dan el AUC más
+   alto (0.7920), pero empatan (≤ 0.001) con `lightgbm+xgboost` (0.7913), `lightgbm+xgboost+catboost`
+   (0.7912), los 4 árboles (0.7911), LightGBM solo (0.7911) y XGBoost solo (0.7910). El desempate por lift lo
+   gana **`lightgbm+xgboost+catboost`** (2.34; los demás ≤ 2.32).
+
+**Modelo final: ensemble `lightgbm+xgboost+catboost`**, 6 variables, ventana expansiva, pesos de clase
+tuneados (w ≈ 1.05–1.21). AUC medio 0.7912 ± 0.009, lift top-10 % mensual 2.34. Spec completa (variables,
+hiperparámetros, ventana) en `04_modelado/modelo_final.json`.
+
+Lecturas:
+
+- Los cinco algoritmos quedan en 0.787–0.791: el techo sigue estando en la información, no en el algoritmo
+  (consistente con `sem1`). La diferencia entre el final y LightGBM solo (0.0001 de AUC, +0.03 de lift)
+  está dentro del ruido entre bloques (std ≈ 0.009); el ensemble se elige por el criterio declarado, no
+  porque sea claramente mejor. Con una tolerancia de lift de 0.04 en vez de 0.02 habría ganado LightGBM solo.
+- Varios estudios tienen su mejor trial cerca del final (#90–#99): 100 trials no satura la búsqueda, pero
+  la ganancia entre el trial 30 y el 100 es ≤ 0.0009 de AUC en todos los estudios (`trials/*.csv`; gráfico
+  de convergencia en el notebook). Más presupuesto no cambiaría la decisión.
+- El peso de clase óptimo queda cerca de 1 en los tres miembros: con AUC como objetivo, ponderar aporta poco;
+  la ganancia del paso 1 (+0.0005) es marginal.
+
+Detalle: `reports/modelado.md`.
+
 ## Infraestructura
 
 - `src/datos.py`: carga, preprocess (imputación + 6 derivadas), cliente BigQuery con cuenta gmail.
 - `src/particion.py`: `oot_split`, `temporal_folds`, `describe`.
 - `src/evaluacion.py`: `evaluar(make_model, df, feats, folds, ventana_meses)` → AUC por bloque,
-  media, std, lift top-10 % mensual, predicciones OOF. Reutilizable en `04` y `05`.
+  media, std, lift top-10 % mensual, predicciones OOF; `metricas_oof(df, oof, folds)` para ensembles
+  por promedio de OOF. Reutilizable en `05`.
+- `04_modelado/tuning.py`: espacios de búsqueda, `build(algo, params)`, `tune(...)` con SQLite.
 - Notebooks escritos directo (sin builders); el kernel corre desde la carpeta del notebook.
-- `data/` no se versiona.
+- `data/`, `optuna.db` y `trials/` no se versionan.
 
 ## Próximo paso
 
-`04_modelado`: desbalance (4 estrategias) → Optuna para 5 algoritmos × {6, 42} variables →
-ventanas 24/36/48/todo → ensembles por promedio. Presupuesto de trials por definir (50 o 100).
+`05_evaluacion`: (a) verificación complementaria con GroupKFold por `id_vendedor` con la configuración
+final fija; (b) entrenar los 3 miembros con todo el pool de desarrollo (`modelo_final.json`) y evaluar el
+OOT **una sola vez**: AUC, PR-AUC, curva ROC, matriz de confusión, precisión/recall/lift por % contactado.
+Guardar los modelos en `models/` (no versionado).

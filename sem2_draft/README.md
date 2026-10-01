@@ -10,7 +10,7 @@ Las funciones compartidas viven en `src/`.
 | `01_eda/` | — | `eda.ipynb`: balance, estabilidad temporal, panel, nulos, señal univariada, redundancia → `reports/eda.md`. |
 | `02_particion/` | 4.3 | `particion.ipynb`: OOT (últimos 4 meses) + brecha 6 m + 4 bloques de validación expansiva → `particion.json`. |
 | `03_variables/` | 4.2 | `variables.ipynb`: permutación dentro del entrenamiento + ablación forward sobre los 4 bloques → `variables_seleccionadas.json`, `reports/variables.md`. |
-| `04_modelado/` | 4.1 + 4.3 | pendiente |
+| `04_modelado/` | 4.1 + 4.3 | `modelado.ipynb` + `tuning.py`: desbalance (4 estrategias) → Optuna 5 algoritmos × {6, 42} variables (100 trials, mismo presupuesto) → ventanas 24/36/48/todo → ensembles por promedio → `modelo_final.json`, `reports/modelado.md`. Estudios en `optuna.db` (no versionado, reanudable). |
 | `05_evaluacion/` | 4.3 | pendiente |
 | `06_interpretacion/` | 4.4 | pendiente |
 
