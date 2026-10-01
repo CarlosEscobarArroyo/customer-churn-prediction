@@ -1,0 +1,59 @@
+{
+  "gap": 6,
+  "oot_months": 4,
+  "n_folds": 4,
+  "fold_months": 4,
+  "n_filas": 31235,
+  "bloques": [
+    {
+      "bloque": "val_1",
+      "train_desde": "2016-12",
+      "train_hasta": "2023-07",
+      "val_desde": "2024-02",
+      "val_hasta": "2024-05",
+      "n_train": 23426,
+      "n_val": 1006,
+      "churn_val": 0.2833
+    },
+    {
+      "bloque": "val_2",
+      "train_desde": "2016-12",
+      "train_hasta": "2023-11",
+      "val_desde": "2024-06",
+      "val_hasta": "2024-09",
+      "n_train": 24594,
+      "n_val": 1110,
+      "churn_val": 0.2793
+    },
+    {
+      "bloque": "val_3",
+      "train_desde": "2016-12",
+      "train_hasta": "2024-03",
+      "val_desde": "2024-10",
+      "val_hasta": "2025-01",
+      "n_train": 25637,
+      "n_val": 1039,
+      "churn_val": 0.3282
+    },
+    {
+      "bloque": "val_4",
+      "train_desde": "2016-12",
+      "train_hasta": "2024-07",
+      "val_desde": "2025-02",
+      "val_hasta": "2025-05",
+      "n_train": 26695,
+      "n_val": 872,
+      "churn_val": 0.3177
+    },
+    {
+      "bloque": "oot",
+      "train_desde": "2016-12",
+      "train_hasta": "2025-05",
+      "val_desde": "2025-12",
+      "val_hasta": "2026-03",
+      "n_train": 29183,
+      "n_val": 879,
+      "churn_val": 0.2765
+    }
+  ]
+}

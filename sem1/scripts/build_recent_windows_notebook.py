@@ -42,7 +42,7 @@ from sklearn.metrics import roc_auc_score, average_precision_score
 from sklearn.pipeline import make_pipeline
 
 ROOT = Path.cwd().resolve()
-while not (ROOT / "pyproject.toml").exists() and ROOT != ROOT.parent:
+while not (ROOT / ".fase_root").exists() and ROOT != ROOT.parent:
     ROOT = ROOT.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))

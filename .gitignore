@@ -3,9 +3,9 @@
 # =============================================================================
 # Solo permitimos schema/diccionario (.md) y queries (.sql) bajo data/.
 # Cualquier export de tabla o muestreo queda fuera.
-data/*
-!data/*.md
-!data/*.sql
+**/data/*
+!**/data/*.md
+!**/data/*.sql
 
 # Y por si acaso, en cualquier subdirectorio:
 *.csv
@@ -21,8 +21,8 @@ data/*
 *.npy
 
 # JSON de datos (excepto config legítima del proyecto)
-data/*.json
-data/*.jsonl
+**/data/*.json
+**/data/*.jsonl
 
 # =============================================================================
 # CREDENCIALES — nunca al repo
@@ -44,9 +44,9 @@ gcp-key*.json
 # =============================================================================
 # Modelos entrenados (binarios + pueden contener fingerprints del dataset)
 # =============================================================================
-models/*
-!models/.gitkeep
-!models/README.md
+**/models/*
+!**/models/.gitkeep
+!**/models/README.md
 *.pkl
 *.joblib
 *.onnx

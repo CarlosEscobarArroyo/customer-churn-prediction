@@ -32,9 +32,9 @@ import numpy as np
 import pandas as pd
 
 ROOT = Path.cwd().resolve()
-while not (ROOT / "pyproject.toml").exists() and ROOT != ROOT.parent:
+while not (ROOT / ".fase_root").exists() and ROOT != ROOT.parent:
     ROOT = ROOT.parent
-if not (ROOT / "pyproject.toml").exists():
+if not (ROOT / ".fase_root").exists():
     raise FileNotFoundError("Abrir este notebook dentro del repositorio")
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
