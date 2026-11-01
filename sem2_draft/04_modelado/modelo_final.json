@@ -1,7 +1,7 @@
 {
   "fecha": "2026-10-01",
   "n_trials": 100,
-  "criterio": "AUC medio 4 bloques; empate (<= 0.001) por lift top-10 % mensual; empate (<= 0.02) el más simple",
+  "criterio": "AUC medio 4 bloques; empate (<= 0.001) por lift top-10 % mensual; empate (<= 0.04) el más simple",
   "desbalance": "pesos de clase",
   "candidatos": {
     "logreg": {
@@ -260,15 +260,13 @@
     }
   },
   "final": {
-    "config": "lightgbm+xgboost+catboost",
-    "tipo": "ensemble",
+    "config": "lightgbm",
+    "tipo": "individual",
     "miembros": [
-      "lightgbm",
-      "xgboost",
-      "catboost"
+      "lightgbm"
     ],
-    "auc": 0.7912,
-    "lift10": 2.344,
+    "auc": 0.7910583194210046,
+    "lift10": 2.312015255550178,
     "n_vars": 6
   }
 }

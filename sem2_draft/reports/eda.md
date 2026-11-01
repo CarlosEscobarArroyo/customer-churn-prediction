@@ -28,7 +28,7 @@ Generado por `01_eda/eda.ipynb`. Fuente: `data/churn_dataset_processed.csv`.
 ## Completitud
 12 columnas con nulos en el SQL (máximo 48.2%); 0 nulos tras `preprocess`.
 
-## Señal univariada (top 10 por AUC)
+## Análisis bivariado (top 10 por AUC)
 |                   |    auc | direccion   |
 |:------------------|-------:|:------------|
 | n_prod_u12        | 0.7216 | - churn     |

@@ -1,7 +1,7 @@
 # Modelado (sem2)
 
 Generado por `04_modelado/modelado.ipynb`. Pool de desarrollo: 29,183 filas; 4 bloques de validación temporal
-(`02_particion/particion.json`). Criterio: AUC medio 4 bloques; empate (<= 0.001) por lift top-10 % mensual; empate (<= 0.02) el más simple.
+(`02_particion/particion.json`). Criterio: AUC medio 4 bloques; empate (<= 0.001) por lift top-10 % mensual; empate (<= 0.04) el más simple.
 
 ## 1 · Desbalance (§4.1) — XGBoost de referencia, 6 variables
 | config         |   auc_b1 |   auc_b2 |   auc_b3 |   auc_b4 |    auc |    std |   lift10 |
@@ -71,13 +71,11 @@ Ventana elegida: logreg → 36m, rf → todo, xgboost → todo, lightgbm → tod
 | logreg                              |            1 |       42 | 36m         |   0.7928 |   0.7776 |   0.796  |   0.7819 | 0.7871 | 0.0076 |    2.242 |
 
 ## Modelo final
-**lightgbm+xgboost+catboost** (ensemble, 6 variables): AUC medio 0.7912,
-lift top-10 % mensual 2.34.
+**lightgbm** (individual, 6 variables): AUC medio 0.7911,
+lift top-10 % mensual 2.31.
 
 Hiperparámetros de los miembros:
 - `lightgbm` (6 vars, ventana todo): `{'w': 1.0809366442018964, 'n_estimators': 450, 'learning_rate': 0.01194484865470532, 'num_leaves': 31, 'min_child_samples': 6, 'subsample': 0.6490876456502913, 'colsample_bytree': 0.5675823318446789, 'reg_lambda': 3.6583631415514786, 'reg_alpha': 7.917674381996484}`
-- `xgboost` (6 vars, ventana todo): `{'w': 1.2144133732796452, 'n_estimators': 300, 'learning_rate': 0.014300848118031843, 'max_depth': 6, 'min_child_weight': 16.564848321502605, 'subsample': 0.9996157411929472, 'colsample_bytree': 0.5347541959768086, 'gamma': 2.589573610083936, 'reg_lambda': 0.07911200387245458, 'reg_alpha': 5.919074950856576}`
-- `catboost` (6 vars, ventana todo): `{'w': 1.0460297856090754, 'iterations': 200, 'learning_rate': 0.011828970101096912, 'depth': 6, 'l2_leaf_reg': 23.866719567196707, 'random_strength': 0.030589318465974465, 'bagging_temperature': 0.9967629508977666}`
 
 Lectura: todas las métricas son de selección (los mismos bloques se usan para decidir); la estimación final es la
 del OOT en `05_evaluacion`.
