@@ -1,0 +1,120 @@
+{
+  "trial": 73,
+  "cv_auc": 0.7871907029522612,
+  "params": {
+    "features": "all",
+    "balance": false,
+    "iterations": 700,
+    "depth": 5,
+    "learning_rate": 0.006315850736432607,
+    "l2_leaf_reg": 0.11227582284937328,
+    "random_strength": 0.012034828799527714,
+    "subsample": 0.650515485078948,
+    "rsm": 0.9390088673881108
+  },
+  "metrics": {
+    "auc_std_between_blocks": 0.006643438338316566,
+    "fold_metrics": [
+      {
+        "auc": 0.7823237356461156,
+        "average_precision": 0.6094670727962584,
+        "lift10": 2.0016752423118342,
+        "recall_at_05": 0.36982968369829683,
+        "monthly_auc": {
+          "2023-10-01": 0.774582560296846,
+          "2023-11-01": 0.7572752608723832,
+          "2023-12-01": 0.826225820962663,
+          "2024-01-01": 0.7728251507321274
+        },
+        "n_features": 42
+      },
+      {
+        "auc": 0.7938681655595299,
+        "average_precision": 0.5478635795363687,
+        "lift10": 2.2237894736842105,
+        "recall_at_05": 0.3543859649122807,
+        "monthly_auc": {
+          "2024-02-01": 0.7236360131096973,
+          "2024-03-01": 0.818687707641196,
+          "2024-04-01": 0.8140243902439025,
+          "2024-05-01": 0.8122072196197299
+        },
+        "n_features": 42
+      },
+      {
+        "auc": 0.7789838709677418,
+        "average_precision": 0.5429580794251806,
+        "lift10": 2.2903225806451615,
+        "recall_at_05": 0.3903225806451613,
+        "monthly_auc": {
+          "2024-06-01": 0.7931701030927836,
+          "2024-07-01": 0.8223091976516634,
+          "2024-08-01": 0.7630675526024363,
+          "2024-09-01": 0.7458404074702887
+        },
+        "n_features": 42
+      },
+      {
+        "auc": 0.7935870396356578,
+        "average_precision": 0.6570178064463376,
+        "lift10": 2.3961221991287758,
+        "recall_at_05": 0.4310850439882698,
+        "monthly_auc": {
+          "2024-10-01": 0.809559685250293,
+          "2024-11-01": 0.7960244251006885,
+          "2024-12-01": 0.7911759636927673,
+          "2025-01-01": 0.7832668226228154
+        },
+        "n_features": 42
+      }
+    ]
+  },
+  "training_rows": 28311,
+  "training_end": "2025-01-01",
+  "features": [
+    "meses_activos_u3",
+    "meses_activos_u6",
+    "meses_activos_u12",
+    "n_ped_u3",
+    "n_ped_u6",
+    "n_ped_u12",
+    "monto_u3",
+    "monto_u6",
+    "monto_u12",
+    "monto_mean_u12",
+    "monto_std_u12",
+    "monto_cv_u12",
+    "monto_ult_vs_media",
+    "meses_desde_compra_previa",
+    "compras_hist",
+    "n_prod_u12",
+    "n_cat_max_u12",
+    "tend_monto_u3_vs_prev3",
+    "tend_nped_u3_vs_prev3",
+    "monto_acum",
+    "n_ped_acum",
+    "n_prod_acum",
+    "n_cat_max_acum",
+    "ticket_acum",
+    "monto_por_prod_acum",
+    "monto_mensual_acum",
+    "d_monto_m1",
+    "d_monto_m3",
+    "d_monto_m6",
+    "d_monto_m9",
+    "d_monto_m12",
+    "d_nped_m1",
+    "d_nped_m3",
+    "d_nped_m6",
+    "d_nped_m9",
+    "d_nped_m12",
+    "ticket_prom_u12",
+    "ticket_prom_u3",
+    "intensidad_u3",
+    "basket_size_u12",
+    "recencia_norm",
+    "tasa_act_reciente_vs_hist"
+  ],
+  "model_sha256": "57a300b7a6cbb05d45607d764ce404faf5e6ac7afbdb5ac04d9a703e6968bca5",
+  "note": "CV-selected candidate; historical OOT not evaluated; not production-approved"
+}

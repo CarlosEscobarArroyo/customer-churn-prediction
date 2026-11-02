@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "code_sha256": "f17eea965582a91c54692c13655b8804e3f69bb9b2c2f9d1c2be59acaaf5271e",
+  "raw_sha256": "21d8399803ba1745402380fd1bb6d40dee8c74600aefc05299a242f0113e6c9d",
+  "train_rows": 28311,
+  "train_end": "2025-01-01",
+  "folds": 4,
+  "validation_months": 4,
+  "gap_months": 6,
+  "objective": "unweighted mean validation block ROC AUC",
+  "excluded_master_columns": [
+    "sexo",
+    "edad",
+    "antiguedad_meses",
+    "tipo_vendedor",
+    "departamento",
+    "provincia"
+  ],
+  "seed": 42,
+  "threads": 4,
+  "packages": {
+    "numpy": "2.4.4",
+    "pandas": "2.3.3",
+    "scikit-learn": "1.8.0",
+    "optuna": "4.8.0",
+    "xgboost": "3.2.0",
+    "catboost": "1.2.10"
+  }
+}

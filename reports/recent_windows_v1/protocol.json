@@ -1,0 +1,57 @@
+{
+  "raw_sha256": "21d8399803ba1745402380fd1bb6d40dee8c74600aefc05299a242f0113e6c9d",
+  "backend_sha256": "f17eea965582a91c54692c13655b8804e3f69bb9b2c2f9d1c2be59acaaf5271e",
+  "helpers_sha256": "7822a641201076c32bb76b8956bcc0289476e5c1ec76d146dcbeb5d8c9679181",
+  "notebook_code_sha256": "83f045c10c00865f2e7365fac051b947221c19f821f9ae889017182d3c910dcc",
+  "baseline_params": {
+    "logreg": {
+      "features": "all",
+      "balance": true,
+      "C": 14.35869573055424,
+      "l1_ratio": 0.07213883479574217
+    },
+    "rf": {
+      "features": "all",
+      "balance": false,
+      "n_estimators": 500,
+      "max_depth": 7,
+      "min_samples_leaf": 13,
+      "max_features": 0.2360700328338257,
+      "max_samples": 0.5364013398828208
+    },
+    "xgboost": {
+      "features": "all",
+      "balance": false,
+      "n_estimators": 600,
+      "max_depth": 3,
+      "learning_rate": 0.009021551036707301,
+      "min_child_weight": 5.420904487248573,
+      "subsample": 0.6382301179880319,
+      "colsample_bytree": 0.9589699815666388,
+      "reg_alpha": 7.138510103611994,
+      "reg_lambda": 7.797641848293195,
+      "gamma": 3.964597392129458
+    },
+    "catboost": {
+      "features": "all",
+      "balance": false,
+      "iterations": 700,
+      "depth": 5,
+      "learning_rate": 0.006315850736432607,
+      "l2_leaf_reg": 0.11227582284937328,
+      "random_strength": 0.012034828799527714,
+      "subsample": 0.650515485078948,
+      "rsm": 0.9390088673881108
+    }
+  },
+  "windows": {
+    "all": null,
+    "24m": 24,
+    "36m": 36,
+    "48m": 48
+  },
+  "seed": 42,
+  "threads": 4,
+  "validation": "same four 4-month blocks as temporal_v1, gap=6",
+  "ensemble": "equal probability averages: six pairs and all four; best window per model"
+}

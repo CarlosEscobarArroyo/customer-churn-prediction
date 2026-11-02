@@ -1,0 +1,32 @@
+{
+  "mean_logreg_rf": [
+    "logreg_36m",
+    "rf_all"
+  ],
+  "mean_logreg_xgboost": [
+    "logreg_36m",
+    "xgboost_all"
+  ],
+  "mean_logreg_catboost": [
+    "logreg_36m",
+    "catboost_all"
+  ],
+  "mean_rf_xgboost": [
+    "rf_all",
+    "xgboost_all"
+  ],
+  "mean_rf_catboost": [
+    "rf_all",
+    "catboost_all"
+  ],
+  "mean_xgboost_catboost": [
+    "xgboost_all",
+    "catboost_all"
+  ],
+  "mean_logreg_rf_xgboost_catboost": [
+    "logreg_36m",
+    "rf_all",
+    "xgboost_all",
+    "catboost_all"
+  ]
+}

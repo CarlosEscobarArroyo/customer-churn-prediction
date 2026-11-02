@@ -1,0 +1,14 @@
+{
+  "best_candidate": "mean_logreg_xgboost",
+  "best_auc": 0.7896127166386948,
+  "reference_rf_all_auc": 0.7883262518632361,
+  "delta_vs_reference": 0.0012864647754586844,
+  "best_windows": {
+    "logreg": "logreg_36m",
+    "rf": "rf_all",
+    "xgboost": "xgboost_all",
+    "catboost": "catboost_all"
+  },
+  "reached_080_in_selection": false,
+  "scope": "Selection on reused temporal validations; no independent final test"
+}

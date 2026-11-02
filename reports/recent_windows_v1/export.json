@@ -1,0 +1,10 @@
+{
+  "candidate": "mean_logreg_xgboost",
+  "components": [
+    "logreg_36m",
+    "xgboost_all"
+  ],
+  "sha256": "2a07196949dea6677ec0727a9937ae8a6c8394e81dacfd793554f399d8bd43ec",
+  "training_end": "2025-01-01",
+  "status": "candidate selected on validation; requires final evaluation"
+}

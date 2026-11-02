@@ -1,0 +1,8 @@
+{
+  "experimento": "ceacafa20f395276",
+  "fecha_utc": "2026-11-01T22:21:04.066953+00:00",
+  "carpeta_resultados": "/home/carlos/projects/glamour/customer-churn-prediction/sem2_draft/04_modelado/resultados_v2/ceacafa20f395276",
+  "configuracion": "/home/carlos/projects/glamour/customer-churn-prediction/sem2_draft/04_modelado/resultados_v2/ceacafa20f395276/modelo_final.json",
+  "modelo": "/home/carlos/projects/glamour/customer-churn-prediction/sem2_draft/04_modelado/resultados_v2/ceacafa20f395276/modelo_final.joblib",
+  "reporte": "/home/carlos/projects/glamour/customer-churn-prediction/sem2_draft/reports/modelado_v2_ceacafa20f395276.md"
+}

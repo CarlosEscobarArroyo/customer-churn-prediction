@@ -1,0 +1,9 @@
+{
+  "observaciones_top":431.0,
+  "personas_distintas_top":395.0,
+  "churn_real_top":295.0,
+  "precision_top_agrupada":0.6844547564,
+  "churn_resto":0.2664640324,
+  "churn_poblacion":0.3076044759,
+  "lift_mensual_medio":2.2467820799
+}

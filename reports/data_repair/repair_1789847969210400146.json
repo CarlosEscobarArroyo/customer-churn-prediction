@@ -1,0 +1,12 @@
+{
+  "changed_positions_zero_based": {
+    "monto_ult_vs_media": [
+      919
+    ]
+  },
+  "before_sha256": "abf89a500703390344f0b07443c856fa61cb1aa8180748afb514bfcc48c3aab4",
+  "after_sha256": "f178fbceffac23039fc46e45872ad3346a7300ed20577facbe4fc445262c30bb",
+  "raw_sha256": "21d8399803ba1745402380fd1bb6d40dee8c74600aefc05299a242f0113e6c9d",
+  "preprocessed_sha256": "f2549319761486daa06e41bfb872b2a3d369bde4fe1f81e58034c90025c66ccf",
+  "backup": "/home/carlos/projects/glamour/customer-churn-prediction/data/processed/churn_dataset_features.before_repair_abf89a500703.csv"
+}
