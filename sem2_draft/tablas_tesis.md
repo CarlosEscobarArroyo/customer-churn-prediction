@@ -1,7 +1,7 @@
 # Tablas para la tesis
 
-Números copiados de `reports/variables.md`, `reports/modelado.md`, `reports/evaluacion.md` y
-`reports/interpretacion.md`. Si se re-ejecuta un notebook, revisar contra esos reportes.
+Números copiados de `reports/variables.md`, `reports/modelado_v2_b2ad959cb4c424b4.md`,
+`reports/evaluacion_v2.md` y `reports/interpretacion_v2.md`. Si se re-ejecuta un notebook, revisar contra esos reportes.
 
 ## Tabla 1. Variables utilizadas en el estudio (42)
 
@@ -28,27 +28,34 @@ forward; se conserva la variable si el AUC-ROC promedio en validación temporal 
 
 | Orden | Variable | Caída de AUC-ROC al permutarla (promedio 4 bloques) | AUC-ROC promedio en validación temporal (4 bloques) al agregarla | % del \|SHAP\| medio en test out-of-time | Efecto sobre el riesgo de churn |
 |--:|---|:--:|:--:|:--:|---|
-| 1 | compras_hist | 0.0089 | 0.6939 | 20.2 | Más historia → menor riesgo |
-| 2 | n_prod_u12 | 0.0071 | 0.7760 | 16.0 | Más productos → menor riesgo |
-| 3 | monto_cv_u12 | 0.0044 | 0.7804 | 13.8 | Más irregularidad → mayor riesgo |
-| 4 | n_ped_u12 | 0.0040 | 0.7825 | 21.9 | Más pedidos → menor riesgo |
-| 5 | monto_u12 | 0.0035 | 0.7844 | 20.2 | Más monto → menor riesgo |
-| 6 | ticket_prom_u3 | 0.0013 | 0.7879 | 7.9 | Mayor ticket → menor riesgo |
+| 1 | compras_hist | 0.0089 | 0.6939 | 13.3 | Más historia → menor riesgo |
+| 2 | n_prod_u12 | 0.0071 | 0.7760 | 22.3 | Más productos → menor riesgo |
+| 3 | monto_cv_u12 | 0.0044 | 0.7804 | 10.5 | Más irregularidad → mayor riesgo |
+| 4 | n_ped_u12 | 0.0040 | 0.7825 | 23.6 | Más pedidos → menor riesgo |
+| 5 | monto_u12 | 0.0035 | 0.7844 | 21.8 | Más monto → menor riesgo |
+| 6 | ticket_prom_u3 | 0.0013 | 0.7879 | 8.6 | Mayor ticket → menor riesgo |
 
-Con el XGBoost de referencia: 42 variables → AUC-ROC 0.7828; 6 variables → 0.7879.
+Con el XGBoost de referencia: 42 variables → AUC-ROC 0.7828; 6 variables → 0.7879. La columna SHAP
+corresponde al modelo final (XGBoost, 6 variables, ventana de 48 meses), TreeSHAP sobre el test
+out-of-time (879 filas).
 
 ## Tabla 3. Comparación de modelos tras la optimización
 
-| Modelo | Variables | Ventana | AUC-ROC promedio en validación temporal (4 bloques) | Desv. est. del AUC-ROC (4 bloques) | Lift top-10 % promedio mensual (validación) | AUC-ROC en test out-of-time |
-|---|:--:|:--:|:--:|:--:|:--:|:--:|
-| **LightGBM** | 6 | Toda la historia | **0.7911** | 0.0084 | **2.31** | **0.7931** |
-| XGBoost | 6 | Toda la historia | 0.7910 | 0.0094 | 2.28 | — |
-| CatBoost | 6 | Toda la historia | 0.7904 | 0.0090 | 2.28 | — |
-| Random Forest | 6 | Toda la historia | 0.7898 | 0.0086 | 2.29 | — |
-| Regresión logística | 42 | 36 meses | 0.7871 | 0.0076 | 2.24 | — |
+Mejor estudio de cada algoritmo.
+
+| Modelo | Variables | Tratamiento del desbalance | Ventana | AUC-ROC promedio en validación temporal (4 bloques) | Desv. est. del AUC-ROC (4 bloques) | Lift top-10 % promedio mensual (validación) | AUC-ROC en test out-of-time (IC 95 %) |
+|---|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| **XGBoost** | 6 | Sin tratamiento | 48 meses | **0.7930** | 0.0098 | 2.3025 | **0.7844 (0.7480–0.8165)** |
+| LightGBM | 6 | Sin tratamiento | 36 meses | 0.7924 | 0.0085 | 2.3058 | — |
+| Random Forest | 6 | Sin tratamiento | 48 meses | 0.7915 | 0.0092 | **2.3187** | — |
+| CatBoost | 6 | SMOTE | 48 meses | 0.7912 | 0.0095 | 2.2256 | — |
+| Regresión logística | 42 | Pesos de clase | 36 meses | 0.7876 | 0.0077 | 2.2577 | — |
 
 Validación temporal: 4 bloques de 4 meses entre feb-2024 y may-2025; cada bloque se entrena solo con
-la historia anterior, con 6 meses de brecha. Hiperparámetros con Optuna (100 trials por modelo);
-variables y ventana elegidas después, con los hiperparámetros fijos. Test out-of-time: dic-2025 →
-mar-2026 (879 filas), evaluado una sola vez con el modelo final; por protocolo, los demás modelos no se
+la historia anterior, con 6 meses de brecha. Optuna busca a la vez hiperparámetros, tratamiento del
+desbalance y ventana: 10 estudios (5 algoritmos × 6 o 42 variables), 1.000 trials por estudio. Regla
+fijada antes de entrenar: mayor AUC-ROC, con tolerancia de 0.001 en AUC-ROC y 0.04 en lift; luego, menos
+variables. XGBoost y LightGBM empatan dentro de la tolerancia; gana XGBoost por AUC-ROC. Test
+out-of-time: dic-2025 → mar-2026 (879 filas, 524 vendedoras), evaluado una sola vez con el modelo
+final; IC 95 % por bootstrap de vendedoras (2.000 repeticiones). Por protocolo, los demás modelos no se
 evalúan ahí.

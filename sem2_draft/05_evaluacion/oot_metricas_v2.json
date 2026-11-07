@@ -1,0 +1,200 @@
+{
+  "fecha_utc": "2026-11-06",
+  "experimento": "b2ad959cb4c424b4",
+  "modelo": "xgboost__seleccionadas",
+  "variables": [
+    "compras_hist",
+    "n_prod_u12",
+    "monto_cv_u12",
+    "n_ped_u12",
+    "monto_u12",
+    "ticket_prom_u3"
+  ],
+  "ventana_meses": 48,
+  "entrenamiento": {
+    "desde": "2021-06",
+    "hasta": "2025-05",
+    "filas": 12240
+  },
+  "versiones": {
+    "evaluacion": {
+      "numpy": "2.4.4",
+      "pandas": "2.3.3",
+      "scikit-learn": "1.8.0",
+      "xgboost": "3.2.0"
+    },
+    "modelado": {
+      "numpy": "2.4.2",
+      "pandas": "2.3.3",
+      "scikit-learn": "1.8.0",
+      "imbalanced-learn": "0.14.2",
+      "xgboost": "3.4.1",
+      "lightgbm": "4.7.0",
+      "catboost": "1.2.10",
+      "optuna": "4.7.0"
+    }
+  },
+  "verificacion": {
+    "group_kfold": {
+      "auc_promedio": 0.7785087407385909,
+      "desviacion_auc": 0.008271241119233762,
+      "lift_promedio": 2.236135223148402,
+      "auc_por_fold": [
+        0.7856,
+        0.7632,
+        0.7767,
+        0.7853,
+        0.7817
+      ]
+    },
+    "stratified_kfold": {
+      "auc_promedio": 0.7807691195622468,
+      "desviacion_auc": 0.011309525394742762,
+      "lift_promedio": 2.2283221012986267,
+      "auc_por_fold": [
+        0.7857,
+        0.7963,
+        0.7709,
+        0.765,
+        0.786
+      ]
+    }
+  },
+  "oot": {
+    "desde": "2025-12",
+    "hasta": "2026-03",
+    "filas": 879,
+    "vendedoras": 524,
+    "prevalencia": 0.2764505119453925,
+    "metricas": [
+      {
+        "metrica": "AUC-ROC",
+        "valor": 0.7844294329269871,
+        "ic95_inferior": 0.7480323395822039,
+        "ic95_superior": 0.8165179894646117
+      },
+      {
+        "metrica": "PR-AUC",
+        "valor": 0.5249477811372973,
+        "ic95_inferior": 0.46442106620718204,
+        "ic95_superior": 0.5965518710215948
+      },
+      {
+        "metrica": "Lift 10 % mensual",
+        "valor": 2.1219315151461693,
+        "ic95_inferior": null,
+        "ic95_superior": null
+      }
+    ],
+    "por_mes": [
+      {
+        "mes": "2025-12",
+        "filas": 273,
+        "tasa_churn": 0.31135531135531136,
+        "auc": 0.7750312891113893,
+        "lift_10": 2.2601307189542483
+      },
+      {
+        "mes": "2026-01",
+        "filas": 192,
+        "tasa_churn": 0.2708333333333333,
+        "auc": 0.7745879120879121,
+        "lift_10": 1.5546558704453441
+      },
+      {
+        "mes": "2026-02",
+        "filas": 197,
+        "tasa_churn": 0.2639593908629442,
+        "auc": 0.7886604774535809,
+        "lift_10": 1.9939271255060727
+      },
+      {
+        "mes": "2026-03",
+        "filas": 217,
+        "tasa_churn": 0.2488479262672811,
+        "auc": 0.812599409225176,
+        "lift_10": 2.6790123456790123
+      }
+    ],
+    "contacto": [
+      {
+        "porcentaje_contactado": 5,
+        "contactadas": 44,
+        "precision": 0.5227272727272727,
+        "recall": 0.09465020576131687,
+        "lift": 1.8908529741863074
+      },
+      {
+        "porcentaje_contactado": 10,
+        "contactadas": 88,
+        "precision": 0.5909090909090909,
+        "recall": 0.2139917695473251,
+        "lift": 2.1374859708193044
+      },
+      {
+        "porcentaje_contactado": 15,
+        "contactadas": 132,
+        "precision": 0.5984848484848485,
+        "recall": 0.32510288065843623,
+        "lift": 2.1648896371118593
+      },
+      {
+        "porcentaje_contactado": 20,
+        "contactadas": 176,
+        "precision": 0.5738636363636364,
+        "recall": 0.4156378600823045,
+        "lift": 2.075827721661055
+      },
+      {
+        "porcentaje_contactado": 25,
+        "contactadas": 220,
+        "precision": 0.5545454545454546,
+        "recall": 0.5020576131687243,
+        "lift": 2.0059483726150393
+      },
+      {
+        "porcentaje_contactado": 30,
+        "contactadas": 264,
+        "precision": 0.5454545454545454,
+        "recall": 0.5925925925925926,
+        "lift": 1.973063973063973
+      },
+      {
+        "porcentaje_contactado": 40,
+        "contactadas": 352,
+        "precision": 0.48295454545454547,
+        "recall": 0.6995884773662552,
+        "lift": 1.7469837261503929
+      },
+      {
+        "porcentaje_contactado": 50,
+        "contactadas": 440,
+        "precision": 0.44545454545454544,
+        "recall": 0.8065843621399177,
+        "lift": 1.6113355780022445
+      }
+    ],
+    "matrices": [
+      {
+        "corte": "p >= 0.5",
+        "VP": 111,
+        "FP": 88,
+        "FN": 132,
+        "VN": 548,
+        "precision": 0.5577889447236181,
+        "recall": 0.4567901234567901,
+        "porcentaje_contactado": 22.639362912400454
+      },
+      {
+        "corte": "decil superior (p >= 0.617)",
+        "VP": 52,
+        "FP": 36,
+        "FN": 191,
+        "VN": 600,
+        "precision": 0.5909090909090909,
+        "recall": 0.2139917695473251,
+        "porcentaje_contactado": 10.011376564277588
+      }
+    ]
+  }
+}

@@ -194,6 +194,41 @@ Lecturas:
 
 Detalle: `reports/evaluacion.md`.
 
+## v2 — modelado (`04_modelado/modelado_v2.ipynb`) y evaluación (`05_evaluacion/evaluacion_v2.ipynb`)
+
+**Modelado v2.** Optuna busca conjuntamente desbalance, ventana e hiperparámetros: 5 algoritmos × {6, 42}
+variables, 1.000 trials por estudio, sin ensembles. Gana **XGBoost con las 6 variables, sin tratamiento,
+ventana de 48 meses**: AUC medio 0.7930 ± 0.010, lift mensual 2.30. Empata con LightGBM-6 (0.7924) dentro de
+la tolerancia; gana por AUC sin redondear. Las 6 variables superan a las 42 en todos los árboles. Detalle:
+`reports/modelado_v2_b2ad959cb4c424b4.md`.
+
+**Evaluación v2.** Configuración fija desde `resultados_v2/b2ad959cb4c424b4/modelo_final.json`; reentrenada
+en la Mac con xgboost 3.2.0 (el modelado corrió en Linux con 3.4.1; diferencias de milésimas en AUC).
+
+| validación | AUC | std | lift decil |
+|---|---:|---:|---:|
+| temporal 4 bloques (selección) | 0.7930 | 0.010 | 2.30 |
+| GroupKFold(5), ventana 48 m | 0.7785 | 0.008 | 2.24 |
+| StratifiedKFold(5), ventana 48 m | 0.7808 | 0.011 | 2.23 |
+
+GroupKFold − StratifiedKFold = −0.0023: no memoriza vendedoras.
+
+**OOT** (dic-2025 → mar-2026, 879 filas, 524 vendedoras): **AUC 0.784 (IC 95 % 0.748–0.817)**, bootstrap por
+vendedora; PR-AUC 0.525 (0.464–0.597); lift 10 % mensual 2.12. AUC por mes 0.775 / 0.775 / 0.789 / 0.813.
+
+**Nota de honestidad:** es la tercera evaluación sobre este OOT (ensemble 0.7926, LightGBM v1 0.7931, XGBoost
+v2 0.784). La v2 se diseñó conociendo los resultados de v1. LightGBM v1 queda dentro del IC de v2: los modelos
+son equivalentes. No se cambia de modelo por el OOT. `07_experimento` sigue con LightGBM v1.
+
+Detalle: `reports/evaluacion_v2.md`.
+
+**Interpretación v2** (`06_interpretacion/interpretacion_v2.ipynb`): TreeSHAP en log-odds sobre el OOT; el
+modelo reconstruido reproduce el AUC registrado (0.7844); error de exactitud 1.7e-06; valor base 0.289.
+Ranking (% del |SHAP| medio): `n_ped_u12` 23.6, `n_prod_u12` 22.3, `monto_u12` 21.8, `compras_hist` 13.3,
+`monto_cv_u12` 10.5, `ticket_prom_u3` 8.6. Mismas direcciones que v1: solo `monto_cv_u12` eleva el riesgo.
+Frente a v1, `compras_hist` baja del 2.º-3.º lugar (20.2 %) al 4.º. Spearman con la permutación de `03`: 0.26.
+Figuras `img/shap_v2_*.png`; detalle: `reports/interpretacion_v2.md`.
+
 ## 06_interpretacion (§4.4 SHAP)
 
 TreeSHAP en log-odds sobre el OOT (879 filas) con el LightGBM final. Corrida del 2026-10-03.
